@@ -23,16 +23,25 @@ const Button = ({title, onPress}) => (
   </TouchableOpacity>
 )
 
-const Screen1 = ({goScreen2}) => (
+const Screen1 = ({goScreen2, goScreen3}) => (
   <View style={styles.sceneContainer}>
     <Text>This is Screen1</Text>
     <Button title="Go Screen2 &gt;" onPress={goScreen2} />
+    <Button title="Go Screen3 &gt;" onPress={goScreen3} />
   </View>
 )
 
-const Screen2 = ({goBack}) => (
+const Screen2 = ({goBack, goScreen3}) => (
   <View style={styles.sceneContainer}>
     <Text>This is Screen2</Text>
+    <Button title="Go Screen3 &gt;" onPress={goScreen3} />
+    <Button title="&lt; Go Back" onPress={goBack} />
+  </View>
+)
+
+const Screen3 = ({goBack}) => (
+  <View style={styles.sceneContainer}>
+    <Text>This is Screen3</Text>
     <Button title="&lt; Go Back" onPress={goBack} />
   </View>
 )
@@ -67,11 +76,18 @@ class NavExample extends React.Component {
       case 'screen1':
         return (
           <Screen1 goScreen2={this._navigate.bind(this, {type:'push', key:'screen2'})}
+            goScreen3={this._navigate.bind(this, {type:'push', key:'screen3'})}
             {...sceneProps} />
         )
       case 'screen2':
         return (
           <Screen2 goBack={this._navigate.bind(this, {type:'pop'})}
+            goScreen3={this._navigate.bind(this, {type:'push', key:'screen3'})}
+            {...sceneProps} />
+        )
+      case 'screen3':
+        return (
+          <Screen3 goBack={this._navigate.bind(this, {type:'pop'})}
             {...sceneProps} />
         )
       default:
