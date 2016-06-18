@@ -13,6 +13,7 @@ const {
 const {
   CardStack: NavCardStack,
   StateUtils: NavStateUtils,
+  Header: NavHeader,
 } = Navigation
 
 const Button = ({title, onPress}) => (
@@ -71,14 +72,19 @@ class NavExample extends React.Component {
       }
     }
     this._renderScene = this._renderScene.bind(this)
-    this._navigate = this._navigate.bind(this)
+    this._renderHeader = this._renderHeader.bind(this)
+
+    this._goScreen2 = this._navigate.bind(this, {type:'push', key:'screen2'})
+    this._goScreen3 = this._navigate.bind(this, {type:'push', key:'screen3'})
+    this._goBack = this._navigate.bind(this, {type:'pop'})
   }
   render() {
     return (
       <NavCardStack
         renderScene={this._renderScene}
+        renderOverlay={this._renderHeader}
         navigationState={this.state.navigation}
-        onNavigate={this._navigate}
+        onNavigate={this._goBack}
       />
     )
   }
@@ -88,19 +94,19 @@ class NavExample extends React.Component {
     switch (scene) {
       case 'screen1':
         return (
-          <Screen1 goScreen2={this._navigate.bind(this, {type:'push', key:'screen2'})}
-            goScreen3={this._navigate.bind(this, {type:'push', key:'screen3'})}
+          <Screen1 goScreen2={this._goScreen2}
+            goScreen3={this._goScreen3}
             {...sceneProps} />
         )
       case 'screen2':
         return (
-          <Screen2 goBack={this._navigate.bind(this, {type:'pop'})}
-            goScreen3={this._navigate.bind(this, {type:'push', key:'screen3'})}
+          <Screen2 goBack={this._goBack}
+            goScreen3={this._goScreen3}
             {...sceneProps} />
         )
       case 'screen3':
         return (
-          <Screen3 goBack={this._navigate.bind(this, {type:'pop'})}
+          <Screen3 goBack={this._goBack}
             {...sceneProps} />
         )
       default:
@@ -110,6 +116,14 @@ class NavExample extends React.Component {
           </View>
         )
     }
+  }
+  _renderHeader(sceneProps) {
+    return (
+      <NavHeader {...sceneProps}
+        renderTitleComponent={() => (<NavHeader.Title>{sceneProps.scene.route.key}</NavHeader.Title>)}
+        onNavigate={this._goBack}
+        />
+    )
   }
   _navigate(action) {
     const newNavState = reduceNavState(this.state.navigation, action)
