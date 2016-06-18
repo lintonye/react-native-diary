@@ -46,6 +46,19 @@ const Screen3 = ({goBack}) => (
   </View>
 )
 
+const reduceNavState = (navState, action) => {
+  const {type, key} = action;
+  switch (type) {
+    case 'push':
+      const route = {key}
+      return NavStateUtils.push(navState, route)
+    case 'pop':
+      return NavStateUtils.pop(navState)
+    default:
+      return navState
+  }
+}
+
 class NavExample extends React.Component {
   constructor(props, context) {
     super(props, context)
@@ -99,23 +112,12 @@ class NavExample extends React.Component {
     }
   }
   _navigate(action) {
-    const {type, key} = action;
-    let navState = this.state.navigation
-    let newNavState = navState
-    switch (type) {
-      case 'push':
-        const route = {key}
-        newNavState = NavStateUtils.push(navState, route)
-        break;
-      case 'pop':
-        newNavState = NavStateUtils.pop(navState)
-        break
-      default:
-        break
+    const newNavState = reduceNavState(this.state.navigation, action)
+    if (newNavState !== this.state.navigation) {
+      this.setState({
+        navigation: newNavState,
+      })
     }
-    this.setState({
-      navigation: newNavState,
-    })
   }
 }
 
