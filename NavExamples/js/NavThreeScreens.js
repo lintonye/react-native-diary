@@ -8,6 +8,8 @@ const {
   TouchableOpacity,
   Text,
   StyleSheet,
+  Platform,
+  BackAndroid,
 } = require('react-native')
 
 const {
@@ -77,6 +79,16 @@ class NavExample extends React.Component {
     this._goScreen2 = this._navigate.bind(this, {type:'push', key:'screen2'})
     this._goScreen3 = this._navigate.bind(this, {type:'push', key:'screen3'})
     this._goBack = this._navigate.bind(this, {type:'pop'})
+    if (Platform.OS === 'android') {
+      BackAndroid.addEventListener('hardwareBackPress', () => {
+        if (this.state.navigation.index > 0) {
+          this._goBack()
+          return true
+        } else {
+          return false
+        }
+      })
+    }
   }
   render() {
     return (
@@ -89,7 +101,7 @@ class NavExample extends React.Component {
     )
   }
   _renderScene(sceneProps) {
-    console.log(JSON.stringify(sceneProps));
+    // console.log(JSON.stringify(sceneProps, null, '  '));
     const scene = sceneProps.scene.route.key
     switch (scene) {
       case 'screen1':
