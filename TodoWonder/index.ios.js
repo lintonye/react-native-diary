@@ -5,6 +5,7 @@
 import {
   AppRegistry,
 } from 'react-native';
-import YourApplication from './js/NavigationHeaderScenesTabs-example'
 
-AppRegistry.registerComponent('TodoWonder', () => YourApplication);
+import TodoWonder from './js/TodoWonder'
+
+AppRegistry.registerComponent('TodoWonder', () => TodoWonder);
