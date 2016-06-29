@@ -96,7 +96,7 @@ class NavExample extends React.Component {
         renderScene={this._renderScene}
         renderOverlay={this._renderHeader}
         navigationState={this.state.navigation}
-        onNavigate={this._goBack}
+        onNavigateBack={this._goBack}
       />
     )
   }
@@ -133,7 +133,7 @@ class NavExample extends React.Component {
     return (
       <NavHeader {...sceneProps}
         renderTitleComponent={() => (<NavHeader.Title>{sceneProps.scene.route.key}</NavHeader.Title>)}
-        onNavigate={this._goBack}
+        onNavigateBack={this._goBack}
         />
     )
   }
