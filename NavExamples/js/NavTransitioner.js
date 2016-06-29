@@ -10,6 +10,8 @@ const {
   StyleSheet,
   Platform,
   BackAndroid,
+  Animated,
+  Easing,
 } = require('react-native')
 
 const {
@@ -75,7 +77,6 @@ class NavExample extends React.Component {
       }
     }
     this._renderScene = this._renderScene.bind(this)
-    this._renderHeader = this._renderHeader.bind(this)
 
     this._goScreen2 = this._navigate.bind(this, {type:'push', key:'screen2'})
     this._goScreen3 = this._navigate.bind(this, {type:'push', key:'screen3'})
@@ -94,48 +95,64 @@ class NavExample extends React.Component {
   render() {
     return (
       <NavTransitioner
-        renderScene={this._renderScene}
-        renderOverlay={this._renderHeader}
+        render={this._render.bind(this)}
         navigationState={this.state.navigation}
-        onNavigate={this._goBack}
+        style={styles.sceneContainer}
+        configureTransition={this._configureTransition}
       />
     )
   }
+  _configureTransition(): NavigationTransitionSpec {
+    const easing: any = Easing.inOut(Easing.ease);
+    return {
+      duration: 200,
+      easing,
+    };
+  }
+  _render(transitionProps) {
+    console.log(JSON.stringify(transitionProps, null, '  '));
+    return transitionProps.scenes.map((scene) => this._renderScene({
+      ...transitionProps,
+      scene,
+    }))
+  }
   _renderScene(sceneProps) {
     // console.log(JSON.stringify(sceneProps, null, '  '));
-    const scene = sceneProps.scene.route.key
-    switch (scene) {
+    const sceneKey = sceneProps.scene.route.key
+    let sceneView;
+    switch (sceneKey) {
       case 'screen1':
-        return (
+        sceneView = (
           <Screen1 goScreen2={this._goScreen2}
             goScreen3={this._goScreen3}
             {...sceneProps} />
         )
+        break
       case 'screen2':
-        return (
+        sceneView = (
           <Screen2 goBack={this._goBack}
             goScreen3={this._goScreen3}
             {...sceneProps} />
         )
+        break
       case 'screen3':
-        return (
+        sceneView = (
           <Screen3 goBack={this._goBack}
             {...sceneProps} />
         )
+        break
       default:
-        return (
+        sceneView = (
           <View style={styles.sceneContainer}>
             <Text>{`No such scene: ${scene}`}</Text>
           </View>
         )
     }
-  }
-  _renderHeader(sceneProps) {
     return (
-      <NavHeader {...sceneProps}
-        renderTitleComponent={() => (<NavHeader.Title>{sceneProps.scene.route.key}</NavHeader.Title>)}
-        onNavigate={this._goBack}
-        />
+      <Animated.View
+        style={[this._getAnimatedStyle(sceneProps)]}>
+        {sceneView}
+      </Animated.View>
     )
   }
   _navigate(action) {
@@ -145,6 +162,28 @@ class NavExample extends React.Component {
         navigation: newNavState,
       })
     }
+  }
+  _getAnimatedStyle(sceneProps): Object {
+    const {
+      layout,
+      position,
+      scene,
+    } = sceneProps;
+
+    const { index } = scene
+
+    const inputRange = [index - 1, index, index + 1];
+    const width = layout.initWidth;
+    const translateX = position.interpolate({
+      inputRange,
+      outputRange: [width, 0, -10],
+    });
+
+    return {
+      transform: [
+        { translateX },
+      ],
+    };
   }
 }
 
