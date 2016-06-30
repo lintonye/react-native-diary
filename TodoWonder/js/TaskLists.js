@@ -12,10 +12,12 @@ import {
 } from 'react-native'
 
 import Button from './Button'
+import PriorityTab from './PriorityTab'
 
 const {PropTypes} = React
 
 const tabs = ['Priority', 'Duration', 'Done']
+const tabComponents = [PriorityTab]
 
 class TaskLists extends React.Component {
   static propTypes: {
@@ -23,6 +25,7 @@ class TaskLists extends React.Component {
   }
   render() {
     const tabIndex = tabs.indexOf(this.props.selectedTab)
+    const Tab = tabComponents.find((c) => c.name === `${this.props.selectedTab}Tab`)
     return (
       <View style={{flex: 1}}>
         <SegmentedControlIOS
@@ -30,6 +33,7 @@ class TaskLists extends React.Component {
           selectedIndex={tabIndex}
           style={styles.tabs}
           />
+        <Tab />
       </View>
     )
   }
