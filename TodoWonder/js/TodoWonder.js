@@ -20,7 +20,7 @@ class TodoWonder extends Component {
       email: 'joe.doe@email.com',
       navigation: {
         index: 0,
-        routes: [{key: 'login_screen'}]
+        routes: [{key: 'task_list_priority'}]
       },
     }
   }

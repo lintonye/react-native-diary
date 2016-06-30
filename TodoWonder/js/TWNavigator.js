@@ -10,10 +10,12 @@ const {
 } = ReactNative
 
 import LoginScreen from './LoginScreen'
+import TaskLists from './TaskLists'
 
 const {
   CardStack: NavCardStack,
   StateUtils: NavStateUtils,
+  Header: NavHeader,
 } = Navigation
 
 const reduceNavState = (navState, action) => {
@@ -29,19 +31,34 @@ const reduceNavState = (navState, action) => {
   }
 }
 
+const Header = ({...sceneProps, goBack}) => (
+  <NavHeader
+    {...sceneProps}
+    renderTitleComponent={() => (<NavHeader.Title>Todo Wonder</NavHeader.Title>)}
+    onNavigateBack={goBack}
+    />
+)
+
 class TWNavigator extends Component {
   constructor(props, context) {
     super(props, context)
     this._renderScene = this._renderScene.bind(this)
+    this._renderHeader = this._renderHeader.bind(this)
     this._goBack = this._navigate.bind(this, 'pop')
   }
   render() {
     return (
       <NavCardStack
         renderScene={this._renderScene}
+        renderOverlay={this._renderHeader}
         navigationState={this.props.navigationState}
-        onNavigate={this._goBack}
+        onNavigateBack={this._goBack}
         />
+    )
+  }
+  _renderHeader(sceneProps) {
+    return (
+      <Header {...sceneProps} goBack={this._goBack}/>
     )
   }
   _renderScene(sceneProps) {
@@ -49,6 +66,8 @@ class TWNavigator extends Component {
     switch (routeKey) {
       case 'login_screen':
         return <LoginScreen {...sceneProps} />
+      case 'task_list_priority':
+        return <TaskLists {...sceneProps} selectedTab="Priority" />
       default:
         return <Text>Unknown route: {routeKey}</Text>
     }
