@@ -17,16 +17,18 @@ class TodoWonder extends Component {
   constructor(props, context) {
     super(props, context)
     this.state = {
+      email: 'joe.doe@email.com',
       navigation: {
         index: 0,
         routes: [{key: 'login_screen'}]
-      }
+      },
     }
   }
   render() {
     return (
-      <TWNavigator navigationState={this.state.navigation}>
-      </TWNavigator>
+      <TWNavigator navigationState={this.state.navigation}
+        {...this.state}
+        />
     )
   }
 }

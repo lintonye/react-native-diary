@@ -11,10 +11,11 @@ import {
 } from 'react-native'
 import Button from './Button'
 
-const LoginScreen = () => (
+const LoginScreen = ({initialEmail}) => (
   <View style={styles.container}>
-    <Text>Enter your email address below</Text>
+    <Text>Enter your email address below:</Text>
     <TextInput style={styles.textInput}
+      defaultValue={initialEmail}
        />
     <Button title='Start' />
   </View>
@@ -29,6 +30,9 @@ const styles = StyleSheet.create({
   },
   textInput: {
     alignSelf: 'stretch',
+    height: 50,
+    borderWidth: 1,
+    margin: 20,
   }
 })
 
