@@ -6,7 +6,7 @@ import React from 'react'
 import {
   View,
   Text,
-  TouchableOpacity,
+  Image,
   StyleSheet,
 } from 'react-native'
 
@@ -14,7 +14,7 @@ class TaskRow extends React.Component {
   render() {
     return (
       <View style={styles.row}>
-        <Text style={styles.grab}>## </Text>
+        <Image source={require('./images/ic_drag_handle.png')} style={styles.grab} />
         <Text style={styles.taskTitle}>{this.props.task.title}</Text>
         <Text>{this.props.task.estimates}</Text>
       </View>
@@ -25,7 +25,11 @@ class TaskRow extends React.Component {
 const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
-    padding: 15,
+    alignItems: 'center',
+    paddingLeft: 5,
+    paddingRight: 15,
+    paddingTop: 15,
+    paddingBottom: 15,
     marginLeft: 5,
     marginRight: 5,
     marginTop: 5,
@@ -37,10 +41,9 @@ const styles = StyleSheet.create({
     shadowRadius: 1,
   },
   grab: {
-    alignSelf: 'center',
+    marginRight: 10,
   },
   taskTitle: {
-    alignSelf: 'flex-start',
     flex: 1,
   }
 })
