@@ -7,6 +7,7 @@ const {
   Text,
   StatusBar,
   NavigationExperimental: Navigation,
+  TouchableOpacity,
 } = ReactNative
 
 import LoginScreen from './LoginScreen'
@@ -31,10 +32,27 @@ const reduceNavState = (navState, action) => {
   }
 }
 
+const renderHeaderRight = (sceneProps) => {
+  const routeKey = sceneProps.scene.route.key
+  let buttonText = ''
+  // TODO this logic should go into individual screens, right?
+  if (routeKey.startsWith('task_list')) {
+    buttonText = 'Add'
+  } else if (routeKey.startsWith('edit_task')) {
+    buttonText = 'Save'
+  }
+  return (
+    <TouchableOpacity style={{flex: 1, justifyContent:'center', alignItems: 'center', padding: 15}}>
+      <Text>{buttonText}</Text>
+    </TouchableOpacity>
+  )
+}
+
 const Header = ({...sceneProps, goBack}) => (
   <NavHeader
     {...sceneProps}
     renderTitleComponent={() => (<NavHeader.Title>Todo Wonder</NavHeader.Title>)}
+    renderRightComponent={renderHeaderRight.bind(null, sceneProps)}
     onNavigateBack={goBack}
     />
 )
