@@ -50,6 +50,7 @@ const styles = StyleSheet.create({
     marginTop: 70, //TODO Why need this margin???
     marginLeft: 20,
     marginRight: 20,
+    marginBottom: 5,
   }
 })
 
