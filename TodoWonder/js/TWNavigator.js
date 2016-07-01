@@ -86,6 +86,10 @@ class TWNavigator extends Component {
         return <LoginScreen {...sceneProps} />
       case 'task_list_priority':
         return <TaskLists {...sceneProps} selectedTab="Priority" />
+      case 'task_list_duration':
+        return <TaskLists {...sceneProps} selectedTab="Duration" />
+      case 'task_list_done':
+        return <TaskLists {...sceneProps} selectedTab="Done" />
       default:
         return <Text>Unknown route: {routeKey}</Text>
     }
