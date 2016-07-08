@@ -9,7 +9,12 @@ import {
   StyleSheet,
   SegmentedControlIOS,
   ScrollView,
+  NavigationExperimental,
 } from 'react-native'
+
+const {
+  CardStack: NavCardStack,
+} = NavigationExperimental
 
 import Button from './Button'
 import PriorityTab from './PriorityTab'
@@ -22,24 +27,49 @@ const tabs = ['Priority', 'Duration', 'Done']
 const tabComponents = [PriorityTab, DurationTab, DoneTab]
 
 class TaskLists extends React.Component {
+  constructor(props, context) {
+    super(props, context)
+    this._renderScene = this._renderScene.bind(this)
+    this._onSwitchTab = this._onSwitchTab.bind(this)
+  }
   static propTypes: {
-    selectedTab: PropTypes.string, // TODO change to oneOf(tabs)
-    switchTab: PropTypes.func.isRequired,
+    // selectedTab: PropTypes.string, // TODO change to oneOf(tabs)
+    // switchTab: PropTypes.func.isRequired,
   }
   render() {
-    const tabIndex = tabs.indexOf(this.props.selectedTab)
-    const Tab = tabComponents.find((c) => c.name === `${this.props.selectedTab}Tab`)
     return (
       <View style={{flex: 1}}>
         <SegmentedControlIOS
           values={tabs}
-          selectedIndex={tabIndex}
+          selectedIndex={this.props.activeTabIndex}
+          onChange={this._onSwitchTab}
           style={styles.tabs}
-          onValueChange={(tab) => this.props.switchTab(`task_list_${tab.toLowerCase()}`)}
           />
-        <Tab />
+        <NavCardStack
+          navigationState={this.props.navigationState}
+          renderScene={this._renderScene}
+          />
       </View>
     )
+  }
+  _onSwitchTab(event) {
+    const tabIndex = event.nativeEvent.selectedSegmentIndex
+    // state: {index:0, routes:[{key, tabIndex}]}
+    this.props.onNavigate((state, action) => {
+      let newRoutes = state.routes.slice(0)
+      const currentRoute = state.routes[state.index]
+      currentRoute.tabIndex = tabIndex
+      newRoutes[state.index] = currentRoute
+
+      return {
+        ...state,
+        routes: newRoutes,
+      }
+    })
+  }
+  _renderScene(sceneProps) {
+    const Tab = tabComponents[this.props.activeTabIndex]
+    return <Tab />
   }
 }
 

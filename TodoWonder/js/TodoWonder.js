@@ -18,15 +18,11 @@ class TodoWonder extends Component {
     super(props, context)
     this.state = {
       email: 'joe.doe@email.com',
-      navigation: {
-        index: 0,
-        routes: [{key: 'task_list_priority'}]
-      },
     }
   }
   render() {
     return (
-      <TWNavigator navigationState={this.state.navigation}
+      <TWNavigator
         {...this.state}
         />
     )
