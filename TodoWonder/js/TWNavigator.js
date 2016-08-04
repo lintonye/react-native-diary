@@ -62,11 +62,14 @@ class TWNavigator extends Component {
     super(props, context)
     this._renderScene = this._renderScene.bind(this)
     this._renderHeader = this._renderHeader.bind(this)
-    this._goBack = this._navigate.bind(this, null, 'pop')
+    this._goBack = this._navigate.bind(this, null, {type: 'pop'})
+    this._gotoTaskList = () => {
+      this._navigate((state, action) => ({index:0, routes:[{key:'task_list'}]}))
+    }
     this.state = {
       navigation: {
         index: 0,
-        routes: [{key: 'task_list', tabIndex: 0, }],
+        routes: [{key: 'login_screen', },],
       },
     }
   }
@@ -89,20 +92,23 @@ class TWNavigator extends Component {
     const routeKey = sceneProps.scene.route.key
     switch (routeKey) {
       case 'login_screen':
-        return <LoginScreen {...sceneProps} />
-      case 'task_list':
-        const tabIndex = sceneProps.scene.route.tabIndex || 0
-        return (
-          <TaskLists {...sceneProps} activeTabIndex={tabIndex}
-            navigationState={this.state.navigation}
-            onNavigate={this._navigate.bind(this)}/>
-        )
+        return <LoginScreen {...sceneProps} gotoTaskList={this._gotoTaskList}/>
       default:
-        return <Text>Unknown route: {routeKey}</Text>
+        if (routeKey.startsWith('task_list')) {
+          const tabIndex = sceneProps.scene.route.tabIndex || 0
+          return (
+            <TaskLists {...sceneProps} activeTabIndex={tabIndex}
+              navigationState={this.state.navigation}
+              onNavigate={this._navigate.bind(this)}/>
+          )
+        } else {
+          return <Text>Unknown route: {routeKey}</Text>
+        }
     }
   }
   _navigate(reducer, action) {
     const newNavState = (reducer || reduceNavState)(this.state.navigation, action)
+    console.log(newNavState);
     if (newNavState !== this.state.navigation) {
       this.setState({
         navigation: newNavState,

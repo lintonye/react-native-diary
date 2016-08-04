@@ -11,13 +11,13 @@ import {
 } from 'react-native'
 import Button from './Button'
 
-const LoginScreen = ({initialEmail}) => (
+const LoginScreen = ({initialEmail, gotoTaskList}) => (
   <View style={styles.container}>
     <Text>Enter your email address below:</Text>
     <TextInput style={styles.textInput}
       defaultValue={initialEmail}
        />
-    <Button title='Start' />
+    <Button title='Start' onPress={gotoTaskList}/>
   </View>
 )
 

@@ -14,6 +14,7 @@ import {
 
 const {
   CardStack: NavCardStack,
+  StateUtils: NavStateUtils,
 } = NavigationExperimental
 
 import Button from './Button'
@@ -59,6 +60,7 @@ class TaskLists extends React.Component {
       let newRoutes = state.routes.slice(0)
       const currentRoute = state.routes[state.index]
       currentRoute.tabIndex = tabIndex
+      currentRoute.key = `task_list-${tabIndex}`
       newRoutes[state.index] = currentRoute
 
       return {
