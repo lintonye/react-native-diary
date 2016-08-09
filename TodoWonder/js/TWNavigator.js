@@ -64,7 +64,7 @@ class TWNavigator extends Component {
     this._renderHeader = this._renderHeader.bind(this)
     this._goBack = this._navigate.bind(this, null, {type: 'pop'})
     this._gotoTaskList = () => {
-      this._navigate((state, action) => ({index:0, routes:[{key:'task_list'}]}))
+      this._navigate((state, action) => NavStateUtils.replaceAtIndex(state, 0, {key:'task_list-0'}))
     }
     this.state = {
       navigation: {
@@ -95,9 +95,8 @@ class TWNavigator extends Component {
         return <LoginScreen {...sceneProps} gotoTaskList={this._gotoTaskList}/>
       default:
         if (routeKey.startsWith('task_list')) {
-          const tabIndex = sceneProps.scene.route.tabIndex || 0
           return (
-            <TaskLists {...sceneProps} activeTabIndex={tabIndex}
+            <TaskLists {...sceneProps}
               navigationState={this.state.navigation}
               onNavigate={this._navigate.bind(this)}/>
           )

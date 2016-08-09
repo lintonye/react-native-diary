@@ -37,12 +37,20 @@ class TaskLists extends React.Component {
     // selectedTab: PropTypes.string, // TODO change to oneOf(tabs)
     // switchTab: PropTypes.func.isRequired,
   }
+  _getActiveTabIndex() {
+    const {index, routes} = this.props.navigationState
+    const { key } = routes[index]
+    if (key) {
+      const m = key.match(/task_list-(\d+)/)
+      return m && m[1] ? Number.parseInt(m[1]) : 0
+    } else return 0
+  }
   render() {
     return (
       <View style={{flex: 1}}>
         <SegmentedControlIOS
           values={tabs}
-          selectedIndex={this.props.activeTabIndex}
+          selectedIndex={this._getActiveTabIndex()}
           onChange={this._onSwitchTab}
           style={styles.tabs}
           />
@@ -59,7 +67,6 @@ class TaskLists extends React.Component {
     this.props.onNavigate((state, action) => {
       let newRoutes = state.routes.slice(0)
       const currentRoute = state.routes[state.index]
-      currentRoute.tabIndex = tabIndex
       currentRoute.key = `task_list-${tabIndex}`
       newRoutes[state.index] = currentRoute
 
@@ -70,7 +77,7 @@ class TaskLists extends React.Component {
     })
   }
   _renderScene(sceneProps) {
-    const Tab = tabComponents[this.props.activeTabIndex]
+    const Tab = tabComponents[this._getActiveTabIndex()]
     return <Tab />
   }
 }
