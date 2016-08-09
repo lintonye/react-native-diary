@@ -65,15 +65,7 @@ class TaskLists extends React.Component {
     const tabIndex = event.nativeEvent.selectedSegmentIndex
     // state: {index:0, routes:[{key, tabIndex}]}
     this.props.onNavigate((state, action) => {
-      let newRoutes = state.routes.slice(0)
-      const currentRoute = state.routes[state.index]
-      currentRoute.key = `task_list-${tabIndex}`
-      newRoutes[state.index] = currentRoute
-
-      return {
-        ...state,
-        routes: newRoutes,
-      }
+      return NavStateUtils.replaceAtIndex(state, 0, {key: `task_list-${tabIndex}`})
     })
   }
   _renderScene(sceneProps) {
