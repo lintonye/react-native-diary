@@ -64,23 +64,25 @@ class TWNavigator extends Component {
     this._renderScene = this._renderScene.bind(this)
     this._renderHeader = this._renderHeader.bind(this)
     this._goBack = this._navigate.bind(this, null, {type: 'pop'})
+    const taskListRoute = {
+      key: 'task_list',
+      // tabs
+      navigation: {
+        index: 0,
+        routes: [{key: 'priority'}, {key: 'duration'}, {key: 'done'}]
+      }
+    }
     this._gotoTaskList = () => {
       // this._navigate((state, action) => NavStateUtils.replaceAtIndex(state, 0, {key:'task_list-0'}))
-      this._navigate((state, action) => NavStateUtils.jumpToIndex(state, 1))
+      // this._navigate((state, action) => NavStateUtils.jumpToIndex(state, 1))
+      this._navigate((state, action) =>
+        NavStateUtils.replaceAtIndex(state, state.index, taskListRoute))
     }
     this.state = {
       navigation: {
         index: 0,
         routes: [
-          {key: 'login_screen', },
-          {
-            key: 'task_list',
-            navigation: {
-              index: 0,
-              routes: [{key: 'priority'}, {key: 'duration'}, {key: 'done'}]
-            }
-          },
-          {key: 'edit_task'},
+          props.email ? taskListRoute : {key: 'login_screen', },
         ],
       },
     }
