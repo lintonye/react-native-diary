@@ -12,6 +12,7 @@ const {
 
 import LoginScreen from './LoginScreen'
 import TaskLists from './TaskLists'
+import EditTask from './EditTask'
 
 const {
   CardStack: NavCardStack,
@@ -64,12 +65,23 @@ class TWNavigator extends Component {
     this._renderHeader = this._renderHeader.bind(this)
     this._goBack = this._navigate.bind(this, null, {type: 'pop'})
     this._gotoTaskList = () => {
-      this._navigate((state, action) => NavStateUtils.replaceAtIndex(state, 0, {key:'task_list-0'}))
+      // this._navigate((state, action) => NavStateUtils.replaceAtIndex(state, 0, {key:'task_list-0'}))
+      this._navigate((state, action) => NavStateUtils.jumpToIndex(state, 1))
     }
     this.state = {
       navigation: {
         index: 0,
-        routes: [{key: 'login_screen', },],
+        routes: [
+          {key: 'login_screen', },
+          {
+            key: 'task_list',
+            navigation: {
+              index: 0,
+              routes: [{key: 'priority'}, {key: 'duration'}, {key: 'done'}]
+            }
+          },
+          {key: 'edit_task'},
+        ],
       },
     }
   }
@@ -93,21 +105,32 @@ class TWNavigator extends Component {
     switch (routeKey) {
       case 'login_screen':
         return <LoginScreen {...sceneProps} gotoTaskList={this._gotoTaskList}/>
+      case 'edit_task':
+        return <EditTask {...sceneProps} goBack={this._goBack} />
+      case 'task_list':
+        return (
+          <TaskLists {...sceneProps}
+            navigationState={sceneProps.scene.route.navigation}
+            onNavigate={this._navigateChild.bind(this, routeKey, sceneProps.scene.route.navigation)}/>
+        )
       default:
-        if (routeKey.startsWith('task_list')) {
-          return (
-            <TaskLists {...sceneProps}
-              navigationState={this.state.navigation}
-              onNavigate={this._navigate.bind(this)}/>
-          )
-        } else {
-          return <Text>Unknown route: {routeKey}</Text>
-        }
+        return <Text>Unknown route: {routeKey}</Text>
     }
+  }
+  _navigateChild(routeKey, childNavState, reducer) {
+    const newChildNavState = reducer(childNavState)
+    const newRoutes = this.state.navigation.routes.map((r) => {
+      return r.key !== routeKey ? r : {key: routeKey, navigation: newChildNavState}
+    })
+    this.setState({
+      navigation: {
+        ...this.state.navigation,
+        routes: newRoutes,
+      }
+    })
   }
   _navigate(reducer, action) {
     const newNavState = (reducer || reduceNavState)(this.state.navigation, action)
-    console.log(newNavState);
     if (newNavState !== this.state.navigation) {
       this.setState({
         navigation: newNavState,
