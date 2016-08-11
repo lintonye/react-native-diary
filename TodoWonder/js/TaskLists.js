@@ -48,8 +48,10 @@ class TaskLists extends React.Component {
           style={styles.tabs}
           />
         <NavigationPager
+          {...this.props}
           navigationState={this.props.navigationState}
           renderScene={this._renderScene}
+          navigatePage={this.props.onNavigateTab}
           />
       </View>
     )
