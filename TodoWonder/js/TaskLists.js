@@ -55,10 +55,7 @@ class TaskLists extends React.Component {
   }
   _onSwitchTab(event) {
     const tabIndex = event.nativeEvent.selectedSegmentIndex
-    // state: {index:0, routes:[{key, tabIndex}]}
-    this.props.onNavigateTab((state, action) => {
-      return NavStateUtils.jumpToIndex(state, tabIndex)
-    })
+    this.props.onNavigateTab(tabIndex)
   }
   _renderScene(sceneProps) {
     const Tab = tabComponents[sceneProps.scene.index]

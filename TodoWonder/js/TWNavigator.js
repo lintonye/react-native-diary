@@ -108,8 +108,8 @@ class TWNavigator extends Component {
     )
   }
   _renderScene(sceneProps) {
-    const routeKey = sceneProps.scene.route.key
-    switch (routeKey) {
+    const route = sceneProps.scene.route
+    switch (route.key) {
       case 'login_screen':
         return <LoginScreen {...sceneProps} gotoTaskList={this._gotoTaskList}/>
       case 'edit_task':
@@ -119,27 +119,27 @@ class TWNavigator extends Component {
       case 'task_list':
         return (
           <TaskLists {...sceneProps}
-            navigationState={sceneProps.scene.route.navigation}
-            onNavigateTab={this._navigateChild.bind(this, routeKey, sceneProps.scene.route.navigation)}
+            navigationState={route.navigation}
+            onNavigateTab={(tabIndex) => {
+              const newChildNavState = NavStateUtils.jumpToIndex(route.navigation, tabIndex)
+              const newRoutes = this.state.navigation.routes.map((r) => {
+                return r.key !== route.key ? r : {key: route.key, navigation: newChildNavState}
+              })
+              this.setState({
+                navigation: {
+                  ...this.state.navigation,
+                  routes: newRoutes,
+                }
+              })
+            }}
             onEditTask={(taskId) =>
               this._navigate((state) =>
-                NavStateUtils.push(state, {key: 'edit_task', taskId}))}/>
+                NavStateUtils.push(state, {key: 'edit_task', taskId}))}
+          />
         )
       default:
         return <Text>Unknown route: {routeKey}</Text>
     }
-  }
-  _navigateChild(routeKey, childNavState, reducer) {
-    const newChildNavState = reducer(childNavState)
-    const newRoutes = this.state.navigation.routes.map((r) => {
-      return r.key !== routeKey ? r : {key: routeKey, navigation: newChildNavState}
-    })
-    this.setState({
-      navigation: {
-        ...this.state.navigation,
-        routes: newRoutes,
-      }
-    })
   }
   _navigate(reducer, action) {
     const newNavState = (reducer || reduceNavState)(this.state.navigation, action)
