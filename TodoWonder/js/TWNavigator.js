@@ -33,28 +33,31 @@ const reduceNavState = (navState, action) => {
   }
 }
 
-const renderHeaderRight = (sceneProps) => {
+const renderHeaderRight = (sceneProps, onNavigate) => {
   const routeKey = sceneProps.scene.route.key
   let buttonText = ''
   // TODO this logic should go into individual screens, right?
+  let onPress = null
   if (routeKey.startsWith('task_list')) {
     buttonText = 'Add'
+    onPress = () => onNavigate(null, {key: 'edit_task'})
   } else if (routeKey.startsWith('edit_task')) {
     buttonText = 'Save'
   }
   return (
-    <TouchableOpacity style={{flex: 1, justifyContent:'center', alignItems: 'center', padding: 15}}>
+    <TouchableOpacity style={{flex: 1, justifyContent:'center', alignItems: 'center', padding: 15}}
+      onPress={onPress}>
       <Text>{buttonText}</Text>
     </TouchableOpacity>
   )
 }
 
-const Header = ({...sceneProps, goBack}) => (
+const Header = ({...sceneProps, onNavigate}) => (
   <NavHeader
     {...sceneProps}
     renderTitleComponent={() => (<NavHeader.Title>Todo Wonder</NavHeader.Title>)}
-    renderRightComponent={renderHeaderRight.bind(null, sceneProps)}
-    onNavigateBack={goBack}
+    renderRightComponent={renderHeaderRight.bind(null, sceneProps, onNavigate)}
+    onNavigateBack={onNavigate.bind(null, null, {type: 'pop'})}
     />
 )
 
@@ -63,6 +66,7 @@ class TWNavigator extends Component {
     super(props, context)
     this._renderScene = this._renderScene.bind(this)
     this._renderHeader = this._renderHeader.bind(this)
+    this._navigate = this._navigate.bind(this)
     this._goBack = this._navigate.bind(this, null, {type: 'pop'})
     const taskListRoute = {
       key: 'task_list',
@@ -83,6 +87,7 @@ class TWNavigator extends Component {
         index: 0,
         routes: [
           props.email ? taskListRoute : {key: 'login_screen', },
+          // {key: 'edit_task', taskId: 'abc1'},
         ],
       },
     }
@@ -99,7 +104,7 @@ class TWNavigator extends Component {
   }
   _renderHeader(sceneProps) {
     return (
-      <Header {...sceneProps} goBack={this._goBack}/>
+      <Header {...sceneProps} onNavigate={this._navigate}/>
     )
   }
   _renderScene(sceneProps) {
@@ -108,12 +113,17 @@ class TWNavigator extends Component {
       case 'login_screen':
         return <LoginScreen {...sceneProps} gotoTaskList={this._gotoTaskList}/>
       case 'edit_task':
-        return <EditTask {...sceneProps} goBack={this._goBack} />
+        return (<EditTask {...sceneProps} goBack={this._goBack}
+          taskId={sceneProps.scene.route.taskId} />
+        )
       case 'task_list':
         return (
           <TaskLists {...sceneProps}
             navigationState={sceneProps.scene.route.navigation}
-            onNavigate={this._navigateChild.bind(this, routeKey, sceneProps.scene.route.navigation)}/>
+            onNavigateTab={this._navigateChild.bind(this, routeKey, sceneProps.scene.route.navigation)}
+            onEditTask={(taskId) =>
+              this._navigate((state) =>
+                NavStateUtils.push(state, {key: 'edit_task', taskId}))}/>
         )
       default:
         return <Text>Unknown route: {routeKey}</Text>

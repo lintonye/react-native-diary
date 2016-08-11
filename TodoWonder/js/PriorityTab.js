@@ -13,13 +13,13 @@ import {
 import TaskRow from './TaskRow'
 
 const mockTasks = [
-  { title: 'Meditation', estimates: 'minutes', isDone: false, section: 'today'},
-  { title: 'Call CRA', estimates: '1/2 hour', isDone: false, section: 'today'},
-  { title: 'Read React Native Tutorials - http://reactnativediary.com', estimates: '1/2 hour', isDone: false, section: 'today'},
-  { title: 'Write RND post', estimates: '1 hour', isDone: false, section: 'today'},
-  { title: 'Eat lunch', estimates: '1 hour', isDone: false, section: 'some day'},
-  { title: 'Have dinner', estimates: '1 hour', isDone: false, section: 'some day'},
-  { title: 'Something done', estimates: '1 hour', isDone: true, section: 'some day'},
+  { id:'t1', title: 'Meditation', estimates: 'minutes', isDone: false, section: 'today'},
+  { id:'t2', title: 'Call CRA', estimates: '1/2 hour', isDone: false, section: 'today'},
+  { id:'t3', title: 'Read React Native Tutorials - http://reactnativediary.com', estimates: '1/2 hour', isDone: false, section: 'today'},
+  { id:'t4', title: 'Write RND post', estimates: '1 hour', isDone: false, section: 'today'},
+  { id:'t5', title: 'Eat lunch', estimates: '1 hour', isDone: false, section: 'some day'},
+  { id:'t6', title: 'Have dinner', estimates: '1 hour', isDone: false, section: 'some day'},
+  { id:'t7', title: 'Something done', estimates: '1 hour', isDone: true, section: 'some day'},
 ]
 
 const tasksToSections = (tasks) => tasks.reduce((prev, task) => {
@@ -52,7 +52,7 @@ class PriorityTab extends React.Component {
     )
   }
   _renderRow(rowData) {
-    return <TaskRow task={rowData} />
+    return <TaskRow task={rowData}  {...this.props}/>
   }
   _renderSectionHeader(sectionData, section) {
     return (

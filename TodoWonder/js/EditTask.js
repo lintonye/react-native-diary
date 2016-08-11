@@ -23,8 +23,8 @@ class EditTask extends React.Component {
   }
   render() {
     return (
-      <View>
-        <Text>Edit Task</Text>
+      <View style={{marginTop: 100}}>
+        <Text>Edit Task: {this.props.taskId}</Text>
       </View>
     )
   }

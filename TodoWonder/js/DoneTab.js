@@ -44,7 +44,7 @@ class DoneTab extends React.Component {
     )
   }
   _renderRow(rowData) {
-    return <TaskRow task={rowData} />
+    return <TaskRow  {...this.props} task={rowData} />
   }
 }
 

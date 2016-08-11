@@ -8,17 +8,23 @@ import {
   Text,
   Image,
   StyleSheet,
+  TouchableOpacity,
 } from 'react-native'
 
 class TaskRow extends React.Component {
   render() {
     return (
-      <View style={styles.row}>
-        <Image source={require('./images/ic_drag_handle.png')} style={styles.grab} />
-        <Text style={styles.taskTitle}>{this.props.task.title}</Text>
-        <Text>{this.props.task.estimates}</Text>
-      </View>
+      <TouchableOpacity onPress={this._editTask.bind(this)}>
+        <View style={styles.row}>
+          <Image source={require('./images/ic_drag_handle.png')} style={styles.grab} />
+          <Text style={styles.taskTitle}>{this.props.task.title}</Text>
+          <Text>{this.props.task.estimates}</Text>
+        </View>
+      </TouchableOpacity>
     )
+  }
+  _editTask() {
+    this.props.onEditTask(this.props.task.id)
   }
 }
 
