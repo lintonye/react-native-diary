@@ -21,6 +21,7 @@ import Button from './Button'
 import PriorityTab from './PriorityTab'
 import DurationTab from './DurationTab'
 import DoneTab from './DoneTab'
+import NavigationPager from './NavigationPager'
 
 const {PropTypes} = React
 
@@ -46,7 +47,7 @@ class TaskLists extends React.Component {
           onChange={this._onSwitchTab}
           style={styles.tabs}
           />
-        <NavCardStack
+        <NavigationPager
           navigationState={this.props.navigationState}
           renderScene={this._renderScene}
           />
@@ -59,7 +60,7 @@ class TaskLists extends React.Component {
   }
   _renderScene(sceneProps) {
     const Tab = tabComponents[sceneProps.scene.index]
-    return <Tab onEditTask={this.props.onEditTask}/>
+    return <Tab {...sceneProps} onEditTask={this.props.onEditTask}/>
   }
 }
 
