@@ -25,6 +25,7 @@ const SettingsScreen = ({transition, duration, onTransitionChanged, onDurationCh
                 onValueChange={onTransitionChanged}
             >
                 <Picker.Item label="cardStack" value="cardStack" />
+                <Picker.Item label="crossFade" value="crossFade" />
                 <Picker.Item label="sharedElement" value="sharedElement" />
             </Picker>
             <Text>Duration: {duration} ms</Text>

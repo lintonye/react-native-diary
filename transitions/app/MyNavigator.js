@@ -14,6 +14,7 @@ import PhotoGridScreen from './PhotoGridScreen';
 import PhotoDetail from './PhotoDetail';
 import SettingsScreen from './SettingsScreen';
 import SharedElementTransitioner from './SharedElementTransitioner';
+import CrossFadeTransitioner from './CrossFadeTransitioner';
 
 const {
     CardStack,
@@ -25,7 +26,7 @@ class MyNavigator extends Component {
         navigation: {
             routes: Array<NavigationRoute>
         },
-        transition: 'cardStack' | 'sharedElement',
+        transition: 'cardStack' | 'sharedElement' | 'crossFade',
         duration: number,
     }
     constructor(props) {
@@ -54,6 +55,7 @@ class MyNavigator extends Component {
         const transitionMap = {
             cardStack: CardStack,
             sharedElement: SharedElementTransitioner,
+            crossFade: CrossFadeTransitioner,
         }
         const Transitioner = transitionMap[this.state.transition];
         return (
