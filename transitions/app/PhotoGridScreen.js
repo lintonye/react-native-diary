@@ -26,7 +26,7 @@ class PhotoGridScreen extends Component {
         }
         return (
             <View>
-                <Toolbar title={`${this.props.transition} ${this.props.duration}ms`}
+                <Toolbar title={`${this.props.transition}`}
                     actions={toolbarActions}
                     onActionSelected={onActionSelected}
                  />

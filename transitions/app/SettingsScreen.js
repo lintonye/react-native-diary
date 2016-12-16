@@ -22,18 +22,20 @@ const SettingsScreen = ({transition, duration, onTransitionChanged, onDurationCh
         <View style={styles.container}>
             <Text>Transition</Text>
             <Picker selectedValue={transition}
-                onValueChange={onTransitionChanged}
-            >
+                onValueChange={onTransitionChanged}>
                 <Picker.Item label="cardStack" value="cardStack" />
                 <Picker.Item label="crossFade" value="crossFade" />
+                <Picker.Item label="androidDefault" value="androidDefault" />
                 <Picker.Item label="sharedElement" value="sharedElement" />
             </Picker>
-            <Text>Duration: {duration} ms</Text>
-            <Slider value={duration} 
-                minimumValue={100} 
-                maximumValue={3000}
-                step={100}
-                onValueChange={onDurationChanged} />
+            {
+            // <Text>Duration: {duration} ms</Text>
+            // <Slider value={duration} 
+            //     minimumValue={100} 
+            //     maximumValue={3000}
+            //     step={100}
+            //     onValueChange={onDurationChanged} />
+            }
         </View>
     </View>
 );

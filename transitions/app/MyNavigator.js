@@ -15,6 +15,7 @@ import PhotoDetail from './PhotoDetail';
 import SettingsScreen from './SettingsScreen';
 import SharedElementTransitioner from './SharedElementTransitioner';
 import CrossFadeTransitioner from './CrossFadeTransitioner';
+import AndroidDefaultTransitioner from './AndroidDefaultTransitioner';
 
 const {
     CardStack,
@@ -26,7 +27,7 @@ class MyNavigator extends Component {
         navigation: {
             routes: Array<NavigationRoute>
         },
-        transition: 'cardStack' | 'sharedElement' | 'crossFade',
+        transition: 'cardStack' | 'sharedElement' | 'crossFade' | 'androidDefault',
         duration: number,
     }
     constructor(props) {
@@ -56,6 +57,7 @@ class MyNavigator extends Component {
             cardStack: CardStack,
             sharedElement: SharedElementTransitioner,
             crossFade: CrossFadeTransitioner,
+            androidDefault: AndroidDefaultTransitioner,
         }
         const Transitioner = transitionMap[this.state.transition];
         return (
