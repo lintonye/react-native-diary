@@ -35,9 +35,10 @@ class MyNavigator extends Component {
         this.state = {
             navigation: {
                 routes: [{ key: 'ROUTE_PHOTO_GRID' }],
+                // routes: [{ key: 'ROUTE_PHOTO_DETAIL', photo:{url:'http://lorempixel.com/500/500/animals?71531'} }],
                 index: 0,
             },
-            transition: 'cardStack',
+            transition: 'sharedElement',
             duration: 300,
         };
     }

@@ -52,7 +52,7 @@ class PhotoGrid extends Component {
         return (
             <TouchableNativeFeedback onPress={() => onPhotoPressed(photo)} key={photo.url}>
                 <View style={styles.cell}>
-                    <SharedView>
+                    <SharedView id={`image${photo.url}`}>
                         <Image source={{ uri: photo.url }} style={styles.image}/>
                     </SharedView>
                 </View>
