@@ -29,7 +29,7 @@ class SharedElementTransitioner extends Component {
     }
     _configureTransition() {
         return {
-            duration: 2000,
+            duration: 300,
             useNativeDriver: false,
         }
     }
@@ -43,19 +43,13 @@ class SharedElementTransitioner extends Component {
             </View>
         )
     }
-    _getOverlayContainerStyle(props: NavigationTransitionProps) {        
-        const translateX = props.progress.interpolate({
-            inputRange: [0, 1],
-            outputRange: [0, 200],
+    _getOverlayContainerStyle(props: NavigationTransitionProps) {   
+        const left = props.progress.interpolate({
+            inputRange: [0, 0.999999, 1],
+            outputRange: [0, 0, 100000], // move it off screen after transition is done
         });
         return {
-            position: 'absolute',
-            left: 0,
-            right: 100,
-            top: 0,
-            bottom: 0,
-            backgroundColor:'white',
-            // transform: [ {translateX} ] 
+            left,
         };
     }
     _getSharedElementStyle(props: NavigationTransitionProps, onList, onDetail) {
@@ -111,10 +105,11 @@ class SharedElementTransitioner extends Component {
             );
         });
 
+        const containerStyle = this._getOverlayContainerStyle(props);
         return (
-            <View style={[styles.overlay, this.props.style]}>
+            <Animated.View style={[styles.overlay, this.props.style, containerStyle]}>
                 { sharedElements }
-            </View>
+            </Animated.View>
         );
     }
     _renderScene(props) {
@@ -150,7 +145,7 @@ const styles = StyleSheet.create({
     overlay: {
         position: 'absolute',
         top: 0,
-        left: 0,
+        left: 100000, // invisible by default
         right: 0,
         bottom: 0,
     }
