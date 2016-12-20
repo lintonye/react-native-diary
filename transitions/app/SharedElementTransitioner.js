@@ -56,22 +56,25 @@ class SharedElementTransitioner extends Component {
         const { position, navigationState: {index} } = props;
         const detailOverListScaleX = onDetail.scaleRelativeTo(onList).x;
         const detailOverListScaleY = onDetail.scaleRelativeTo(onList).y;
+        const minIdx = Math.min(index, position._value);
+        const maxIdx = Math.max(index, position._value);
+        const inputRange = [minIdx, maxIdx];
         const scaleX = position.interpolate({
-            inputRange: [index-1, index],
+            inputRange,
             outputRange: [1, detailOverListScaleX],
         });
         const scaleY = position.interpolate({
-            inputRange: [index-1, index],
+            inputRange,
             outputRange: [1, detailOverListScaleY],
         });
         const width = onList.metrics.width;
         const height = onList.metrics.height;
         const left = position.interpolate({
-            inputRange: [index-1, index],
+            inputRange,
             outputRange: [onList.metrics.x, onDetail.metrics.x + width /2 * (detailOverListScaleX - 1)],
         });
         const top = position.interpolate({
-            inputRange: [index-1, index],
+            inputRange,
             outputRange: [onList.metrics.y, onDetail.metrics.y + height /2 * (detailOverListScaleY - 1)],
         });
         return {
@@ -115,7 +118,7 @@ class SharedElementTransitioner extends Component {
     _renderScene(props) {
         const { position, scene, progress } = props;
         const { index } = scene;
-        const inputRange = [index - 1, index - 0.01, index, index + 0.99, index + 1];
+        const inputRange = [index - 1, index - 0.5, index, index + 0.5, index + 1];
         const opacity = position.interpolate({
             inputRange,
             outputRange: [0, 0, 1, 1, 0],
