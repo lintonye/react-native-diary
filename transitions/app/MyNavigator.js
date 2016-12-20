@@ -14,6 +14,7 @@ import PhotoGridScreen from './PhotoGridScreen';
 import PhotoDetail from './PhotoDetail';
 import SettingsScreen from './SettingsScreen';
 import SharedElementTransitioner from './SharedElementTransitioner';
+import MaterialSharedElementTransitioner from './MaterialSharedElementTransitioner';
 import CrossFadeTransitioner from './CrossFadeTransitioner';
 import AndroidDefaultTransitioner from './AndroidDefaultTransitioner';
 
@@ -27,7 +28,7 @@ class MyNavigator extends Component {
         navigation: {
             routes: Array<NavigationRoute>
         },
-        transition: 'cardStack' | 'sharedElement' | 'crossFade' | 'androidDefault',
+        transition: 'cardStack' | 'sharedElement' | 'materialSharedElement' | 'crossFade' | 'androidDefault',
         duration: number,
     }
     constructor(props) {
@@ -38,7 +39,7 @@ class MyNavigator extends Component {
                 // routes: [{ key: 'ROUTE_PHOTO_DETAIL', photo:{url:'http://lorempixel.com/500/500/animals?71531'} }],
                 index: 0,
             },
-            transition: 'sharedElement',
+            transition: 'materialSharedElement',
             duration: 300,
         };
     }
@@ -57,6 +58,7 @@ class MyNavigator extends Component {
         const transitionMap = {
             cardStack: CardStack,
             sharedElement: SharedElementTransitioner,
+            materialSharedElement: MaterialSharedElementTransitioner,
             crossFade: CrossFadeTransitioner,
             androidDefault: AndroidDefaultTransitioner,
         }
