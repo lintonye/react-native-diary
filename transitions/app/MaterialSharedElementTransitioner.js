@@ -6,6 +6,7 @@ import {
     StyleSheet,
     Animated,
     Text,
+    Dimensions,
 } from 'react-native';
 
 import type {NavigationTransitionProps} from 'NavigationTypeDefinition';
@@ -29,7 +30,7 @@ class MaterialSharedElementTransitioner extends Component {
     }
     _configureTransition() {
         return {
-            duration: 3000,
+            duration: 300,
             useNativeDriver: false,
         }
     }
@@ -53,7 +54,7 @@ class MaterialSharedElementTransitioner extends Component {
         };
     }
     _getSharedElementStyle(props: NavigationTransitionProps, onList, onDetail) {
-        const { position, navigationState: {index} } = props;
+        const { position, progress, navigationState: {index} } = props;
         const detailOverListScaleX = onDetail.scaleRelativeTo(onList).x;
         const detailOverListScaleY = onDetail.scaleRelativeTo(onList).y;
         const minIdx = Math.min(index, position._value);
@@ -80,6 +81,7 @@ class MaterialSharedElementTransitioner extends Component {
         return {
             width,
             height,
+            elevation: this._interpolateElevation(progress, 1), // make sure shared elements stay above the faked container
             position: 'absolute',
             left,
             top,
@@ -90,6 +92,63 @@ class MaterialSharedElementTransitioner extends Component {
                 {scaleY},
             ],
         };
+    }
+    _getBBox(metricsArray) {
+        let left = top = Number.MAX_VALUE;
+        let right = bottom = Number.MIN_VALUE;
+        metricsArray.forEach(m => {
+            if (m.x < left) left = m.x;
+            if (m.y < top) top = m.y;
+            if (m.x + m.width > right) right = m.x + m.width;
+            if (m.y + m.height > bottom) bottom = m.y + m.height;
+        });
+        const width = right - left;
+        const height = bottom - top;
+        return { left, top, right, bottom, width, height };
+    }
+    _interpolateElevation(progress, base:number) {
+        return progress.interpolate({
+            inputRange: [0, 1],
+            outputRange: [5 + base, 25 + base],
+        });
+    }
+    _renderFakedSEContainer(pairs, props: NavigationTransitionProps) {
+        const onListBBox = this._getBBox(pairs.map(p => p.onList.metrics));
+        const onDetailBBox = this._getBBox(pairs.map(p => p.onDetail.metrics));
+        const { position, progress, navigationState: {index} } = props;
+        const minIdx = Math.min(index, position._value);
+        const maxIdx = Math.max(index, position._value);
+        const inputRange = [minIdx, maxIdx];
+        const left = position.interpolate({
+            inputRange,
+            outputRange: [onListBBox.left, 0],
+        });
+        const top = position.interpolate({
+            inputRange,
+            outputRange: [onListBBox.top, 0],
+        });
+        const { height: windowHeight, width: windowWidth } = Dimensions.get("window");
+        const width = position.interpolate({
+            inputRange,
+            outputRange: [onListBBox.width, windowWidth],
+        });
+        const height = position.interpolate({
+            inputRange,
+            outputRange: [onListBBox.height, windowHeight],
+        });
+        const elevation = this._interpolateElevation(progress, 0);
+        const style = {
+            backgroundColor: '#e2e2e2',
+            elevation,
+            position: 'absolute',
+            left,
+            top,
+            right: null,
+            bottom: null,
+            width,
+            height,
+        };
+        return <Animated.View style={style} />;
     }
     _renderOverlay(props: NavigationTransitionProps) {
         const pairs = SharedElementRepo.getCompletePairs();
@@ -112,6 +171,7 @@ class MaterialSharedElementTransitioner extends Component {
         return (
             <Animated.View style={[styles.overlay, this.props.style, containerStyle]}>
                 { sharedElements }
+                { this._renderFakedSEContainer(pairs, props) }
             </Animated.View>
         );
     }
@@ -120,7 +180,11 @@ class MaterialSharedElementTransitioner extends Component {
             inputRange: [sceneIndex - 1, sceneIndex, sceneIndex+0.2, sceneIndex + 1],
             outputRange: ['rgba(0,0,0,0)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.5)'],
         });
-        const animatedStyle = { zIndex: 100, backgroundColor, ...this._getOverlayContainerStyle(progress) };
+        const animatedStyle = { 
+            elevation: 5, // to ensure the overlay covers toolbar
+            backgroundColor, 
+            ...this._getOverlayContainerStyle(progress) 
+        };
         return <Animated.View style={[ styles.overlay, animatedStyle ]} />;
     }
     _renderScene(props) {
@@ -133,12 +197,9 @@ class MaterialSharedElementTransitioner extends Component {
         });
         const style = { opacity };
 
-        // The extra view and zIndex below is to make sure the overlay covers toolbar
         return (
             <Animated.View key={props.scene.route.key} style={[style, styles.scene]}>
-                <View style={{zIndex: 1}}>
-                    {this.props.renderScene(props)}
-                </View>
+                {this.props.renderScene(props)}
                 {this._renderDarkeningOverlay(progress, position, index)}
             </Animated.View>
         )
