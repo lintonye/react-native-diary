@@ -10,7 +10,7 @@ import {
 
 import type {NavigationTransitionProps} from 'NavigationTypeDefinition';
 
-import SharedElementRepo from './SharedElementRepo';
+import SharedItems from './SharedItems';
 
 const {
     Transitioner,
@@ -92,7 +92,7 @@ class SharedElementTransitioner extends Component {
         };
     }
     _renderOverlay(props: NavigationTransitionProps) {
-        const pairs = SharedElementRepo.getCompletePairs();
+        const pairs = SharedItems.getCompletePairs();
         const sharedElements = pairs.map((pair, idx) => {
             const {onList, onDetail} = pair;
             const animatedStyle = this._getSharedElementStyle(props, onList, onDetail);

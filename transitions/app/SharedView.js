@@ -7,32 +7,40 @@ import {
     findNodeHandle,
 } from 'react-native';
 
-import NativeMethodsMixin from 'NativeMethodsMixin';
-
-import SharedElementRepo from './SharedElementRepo';
-
 class SharedView extends Component {
+    _view: any;
+    static contextTypes = {
+        registerSharedView: React.PropTypes.func,
+        unregisterSharedView: React.PropTypes.func,
+    };
     render() {
         return (
             <View
-                onLayout={this._onLayout.bind(this)}
-                ref={c => this._comp = c}
-                >
+                ref={c => this._view = c}>
                 {this.props.children}
             </View>
         )
     }
-    _onLayout(event) {
-        const { id, isOnDetail } = this.props;
-        return new Promise((resolve, reject) => {
-            UIManager.measureInWindow(
-                findNodeHandle(this._comp),
-                (x, y, width, height) => {
-                    SharedElementRepo.put(id, !!isOnDetail, this.render(), {x, y, width, height});
-                    resolve();
-                }
-            );
+    componentDidMount() {
+        const { registerSharedView } = this.context;
+        if (!registerSharedView) return;
+
+        const { name, containerRouteName } = this.props;
+        const nativeHandle = findNodeHandle(this._view);
+        registerSharedView({
+            name,
+            containerRouteName,
+            nativeHandle,
+            reactElement: this.render(),
         });
+    }
+
+    componentWillUnmount() {
+        const { unregisterSharedView } = this.context;
+        if (!unregisterSharedView) return;
+        
+        const { name, containerRouteName } = this.props;
+        unregisterSharedView(name, containerRouteName);
     }
 }
 

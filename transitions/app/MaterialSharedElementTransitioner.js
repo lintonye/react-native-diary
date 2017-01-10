@@ -7,17 +7,106 @@ import {
     Animated,
     Text,
     Dimensions,
+    UIManager,
 } from 'react-native';
 
-import type {NavigationTransitionProps} from 'NavigationTypeDefinition';
+import type {NavigationTransitionProps } from 'NavigationTypeDefinition';
 
-import SharedElementRepo from './SharedElementRepo';
+import SharedItems from './SharedItems';
+
+import type { Metrics, SharedItem } from './SharedItems';
 
 const {
     Transitioner,
 } = NavigationExperimental;
 
+type State = {
+    sharedItems: SharedItems,
+}
+
 class MaterialSharedElementTransitioner extends Component {
+    state: State;
+    static childContextTypes = {
+        registerSharedView: React.PropTypes.func,
+        unregisterSharedView: React.PropTypes.func,
+    }
+    constructor(props) {
+        super(props);
+        this.state = {
+            sharedItems: new SharedItems(),
+        }
+    }
+    measureAndUpdate(sharedItem: SharedItem) {
+        UIManager.measureInWindow(
+            sharedItem.nativeHandle,
+            (x, y, width, height) => {
+                this.updateMetrics(
+                    sharedItem.name,
+                    sharedItem.containerRouteName,
+                    { x, y, width, height });
+            }
+        );
+    }
+    setSharedItemsState(sharedItems: SharedItems) {
+        if (this.state.sharedItems !== sharedItems) {
+            this.setState({ sharedItems });
+        }
+    }
+    updateMetrics(name: string, containerRouteName: string, metrics: Metrics) {
+        this.setSharedItemsState(
+            this.state.sharedItems.updateMetrics(name, containerRouteName, metrics)
+        );
+    }
+    addSharedItem(sharedItem: SharedItem) {
+        this.setSharedItemsState(
+            this.state.sharedItems.add(sharedItem)
+        );
+    }
+    removeSharedItem(name: string, containerRouteName: string) {
+        this.setSharedItemsState(
+            this.state.sharedItems.remove(name, containerRouteName)
+        );
+    }
+    removeAllMetrics() {
+        this.setSharedItemsState(
+            this.state.sharedItems.removeAllMetrics()
+        );
+    }
+    getChildContext() {
+        const self = this;
+        return {
+            registerSharedView(sharedItem: SharedItem) {
+                // add to the state
+                self.addSharedItem(sharedItem);
+                // measure using UIManager if another view with the same name is mounted
+                const {name, containerRouteName} = sharedItem;
+
+                const matchingItem = self.state.sharedItems.findMatchByName(name, containerRouteName);
+                if (matchingItem) {
+                    self.measureAndUpdate(sharedItem);
+                    self.measureAndUpdate(matchingItem);
+                }
+            },
+            unregisterSharedView(name: string, containerRouteName: string) {
+                self.removeSharedItem(name, containerRouteName);
+            },
+        };
+    }
+    shouldComponentUpdate(nextProps, nextState:State) {
+        if (this.props === nextProps) {
+            const { sharedItems } = this.state;
+            const nextSharedItems = nextState.sharedItems;
+            // TODO key => routeName
+            const routeName = (navState) => navState.routes[navState.index];
+            const fromRoute = routeName(this.props.navigationState);
+            const toRoute = routeName(nextProps.navigationState);
+            //TODO perhaps there are other things on the state?
+            return sharedItems !== nextSharedItems && nextSharedItems.areMetricsReadyForAllItems(fromRoute, toRoute);
+        } else return true;
+    }
+    onTransitionEnd() {
+        this.removeAllMetrics();
+    }
     render() {
         return (
             <Transitioner
@@ -25,6 +114,7 @@ class MaterialSharedElementTransitioner extends Component {
                 render={this._render.bind(this)}
                 navigationState={this.props.navigationState}
                 style={this.props.style}
+                onTransitionEnd={this.onTransitionEnd.bind(this)}
                 />
         );
     }
@@ -34,13 +124,13 @@ class MaterialSharedElementTransitioner extends Component {
             useNativeDriver: false,
         }
     }
-    _render(props: NavigationTransitionProps) {
+    _render(props: NavigationTransitionProps, prevProps: NavigationTransitionProps) {
         const scenes = props.scenes.map(scene => this._renderScene({ ...props, scene }));
-        const overlay = this._renderOverlay(props);
+        const overlay = this._renderOverlay(props, prevProps);
         return (
             <View style={styles.scenes}>
-                { scenes }
-                { overlay }
+                {scenes}
+                {overlay}
             </View>
         )
     }
@@ -53,30 +143,31 @@ class MaterialSharedElementTransitioner extends Component {
             left,
         };
     }
-    _getSharedElementStyle(props: NavigationTransitionProps, onList, onDetail) {
+    _getSharedElementStyle(props: NavigationTransitionProps, itemFrom, itemTo) {
         const { position, progress, navigationState: {index} } = props;
-        const detailOverListScaleX = onDetail.scaleRelativeTo(onList).x;
-        const detailOverListScaleY = onDetail.scaleRelativeTo(onList).y;
+        const toVsFromScaleX = itemTo.scaleRelativeTo(itemFrom).x;
+        const toVsFromScaleY = itemTo.scaleRelativeTo(itemFrom).y;
+        //TODO use prevProps.navigationState.index instead of position._value
         const minIdx = Math.min(index, position._value);
         const maxIdx = Math.max(index, position._value);
         const inputRange = [minIdx, maxIdx];
         const scaleX = position.interpolate({
             inputRange,
-            outputRange: [1, detailOverListScaleX],
+            outputRange: [1, toVsFromScaleX],
         });
         const scaleY = position.interpolate({
             inputRange,
-            outputRange: [1, detailOverListScaleY],
+            outputRange: [1, toVsFromScaleY],
         });
-        const width = onList.metrics.width;
-        const height = onList.metrics.height;
+        const width = itemFrom.metrics.width;
+        const height = itemFrom.metrics.height;
         const left = position.interpolate({
             inputRange,
-            outputRange: [onList.metrics.x, onDetail.metrics.x + width /2 * (detailOverListScaleX - 1)],
+            outputRange: [itemFrom.metrics.x, itemTo.metrics.x + width / 2 * (toVsFromScaleX - 1)],
         });
         const top = position.interpolate({
             inputRange,
-            outputRange: [onList.metrics.y, onDetail.metrics.y + height /2 * (detailOverListScaleY - 1)],
+            outputRange: [itemFrom.metrics.y, itemTo.metrics.y + height / 2 * (toVsFromScaleY - 1)],
         });
         return {
             width,
@@ -87,9 +178,9 @@ class MaterialSharedElementTransitioner extends Component {
             top,
             right: null,
             bottom: null,
-            transform: [ 
-                {scaleX}, 
-                {scaleY},
+            transform: [
+                { scaleX },
+                { scaleY },
             ],
         };
     }
@@ -106,7 +197,8 @@ class MaterialSharedElementTransitioner extends Component {
         const height = bottom - top;
         return { left, top, right, bottom, width, height };
     }
-    _interpolateElevation(progress, base:number) {
+    _interpolateElevation(progress, base: number) {
+        //TOOD perhaps should use position instead of progress
         return progress.interpolate({
             inputRange: [0, 1],
             outputRange: [5 + base, 25 + base],
@@ -150,19 +242,22 @@ class MaterialSharedElementTransitioner extends Component {
         };
         return <Animated.View style={style} />;
     }
-    _renderOverlay(props: NavigationTransitionProps) {
-        const pairs = SharedElementRepo.getCompletePairs();
+    _renderOverlay(props: NavigationTransitionProps, prevProps: NavigationTransitionProps) {
+        // TODO change to routeName after switching to react-navigation
+        const fromRoute = prevProps ? prevProps.scene.route.key : 'unknownRoute';
+        const toRoute = props.scene.route.key;
+        const pairs = this.state.sharedItems.getMeasuredItemPairs(fromRoute, toRoute);
         const sharedElements = pairs.map((pair, idx) => {
-            const {onList, onDetail} = pair;
-            const animatedStyle = this._getSharedElementStyle(props, onList, onDetail);
-            const element = onList.element; // TODO perhaps need to clone onDetail.element when coming back?
+            const {fromItem, toItem} = pair;
+            const animatedStyle = this._getSharedElementStyle(props, fromItem, toItem);
+            const element = fromItem.reactElement;
             const cloned = React.cloneElement(element, {
                 onLayout: null,
                 ref: null,
             });
             return (
                 <Animated.View style={[animatedStyle]} key={idx}>
-                    { cloned }
+                    {cloned}
                 </Animated.View>
             );
         });
@@ -170,22 +265,22 @@ class MaterialSharedElementTransitioner extends Component {
         const containerStyle = this._getOverlayContainerStyle(props.progress);
         return (
             <Animated.View style={[styles.overlay, this.props.style, containerStyle]}>
-                { sharedElements }
-                { this._renderFakedSEContainer(pairs, props) }
+                {sharedElements}
+                {this._renderFakedSEContainer(pairs, props)}
             </Animated.View>
         );
     }
     _renderDarkeningOverlay(progress, position, sceneIndex: number) {
         const backgroundColor = position.interpolate({
-            inputRange: [sceneIndex - 1, sceneIndex, sceneIndex+0.2, sceneIndex + 1],
+            inputRange: [sceneIndex - 1, sceneIndex, sceneIndex + 0.2, sceneIndex + 1],
             outputRange: ['rgba(0,0,0,0)', 'rgba(0,0,0,0)', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.5)'],
         });
-        const animatedStyle = { 
+        const animatedStyle = {
             elevation: 5, // to ensure the overlay covers toolbar
-            backgroundColor, 
-            ...this._getOverlayContainerStyle(progress) 
+            backgroundColor,
+            ...this._getOverlayContainerStyle(progress)
         };
-        return <Animated.View style={[ styles.overlay, animatedStyle ]} />;
+        return <Animated.View style={[styles.overlay, animatedStyle]} />;
     }
     _renderScene(props) {
         const { position, scene, progress } = props;

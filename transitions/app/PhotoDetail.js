@@ -19,7 +19,7 @@ const { width: windowWidth } = Dimensions.get("window");
 const PhotoDetail = ({ photo: {url, title, description} }) => (
     <ScrollView>
         <View>
-            <SharedView id={`image${url}`} isOnDetail={true}>
+            <SharedView name={`image${url}`} containerRouteName='ROUTE_PHOTO_DETAIL'>
                 <Image source={{ uri: url }} style={styles.image}/>
             </SharedView>
             <Text style={[styles.text, styles.title]}>{title}</Text>
