@@ -218,6 +218,7 @@ class MaterialSharedElementTransitioner extends Component {
         const fromItemBBox = this._getBBox(pairs.map(p => p.fromItem.metrics));
         const toItemBBox = this._getBBox(pairs.map(p => p.toItem.metrics));
         const { position, progress, navigationState: {index} } = props;
+        //TODO use prevProps.navigationState.index instead of position._value
         const minIdx = Math.min(index, position._value);
         const maxIdx = Math.max(index, position._value);
         const inputRange = [minIdx, maxIdx];
