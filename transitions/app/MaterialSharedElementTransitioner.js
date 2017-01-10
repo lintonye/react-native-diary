@@ -37,9 +37,11 @@ class MaterialSharedElementTransitioner extends Component {
         }
     }
     measureAndUpdate(sharedItem: SharedItem) {
+        // console.log('measuring:', sharedItem.name, sharedItem.containerRouteName)
         UIManager.measureInWindow(
             sharedItem.nativeHandle,
             (x, y, width, height) => {
+                //TODO why x,y,w,h are all undefined here?
                 this.updateMetrics(
                     sharedItem.name,
                     sharedItem.containerRouteName,
@@ -47,29 +49,34 @@ class MaterialSharedElementTransitioner extends Component {
             }
         );
     }
-    setSharedItemsState(sharedItems: SharedItems) {
-        if (this.state.sharedItems !== sharedItems) {
-            this.setState({ sharedItems });
-        }
+    setSharedItemsState(fun: (prevState: State) => SharedItems, callback) {
+        this.setState((prevState, props) => (
+            { sharedItems: fun(prevState) }
+        ), callback);
     }
     updateMetrics(name: string, containerRouteName: string, metrics: Metrics) {
-        this.setSharedItemsState(
-            this.state.sharedItems.updateMetrics(name, containerRouteName, metrics)
+        this.setSharedItemsState(prevState =>
+            prevState.sharedItems.updateMetrics(name, containerRouteName, metrics)
         );
     }
     addSharedItem(sharedItem: SharedItem) {
-        this.setSharedItemsState(
-            this.state.sharedItems.add(sharedItem)
+        this.setSharedItemsState(prevState =>
+            prevState.sharedItems.add(sharedItem)
         );
+        // const newItems = this.state.sharedItems.add(sharedItem);
+        // this.setSharedItemsState(
+        //     newItems,
+        //     () => {console.log(`name=${sharedItem.name} this.state.items=`, this.state.sharedItems._items.map(i=>i.name), 'newItems', newItems._items.map(i=>i.name))}
+        // );
     }
     removeSharedItem(name: string, containerRouteName: string) {
-        this.setSharedItemsState(
-            this.state.sharedItems.remove(name, containerRouteName)
+        this.setSharedItemsState(prevState =>
+            prevState.sharedItems.remove(name, containerRouteName)
         );
     }
     removeAllMetrics() {
-        this.setSharedItemsState(
-            this.state.sharedItems.removeAllMetrics()
+        this.setSharedItemsState(prevState =>
+            prevState.sharedItems.removeAllMetrics()
         );
     }
     getChildContext() {
@@ -82,17 +89,20 @@ class MaterialSharedElementTransitioner extends Component {
                 const {name, containerRouteName} = sharedItem;
 
                 const matchingItem = self.state.sharedItems.findMatchByName(name, containerRouteName);
+                // console.log(self.state.sharedItems._items.map(i => i.name))
+                // console.log('registering:', sharedItem.name, sharedItem.containerRouteName, 'matchingItem=',matchingItem, 'items.count()', self.state.sharedItems.count())
                 if (matchingItem) {
                     self.measureAndUpdate(sharedItem);
                     self.measureAndUpdate(matchingItem);
                 }
             },
             unregisterSharedView(name: string, containerRouteName: string) {
+                console.log('Removing:', name, containerRouteName)
                 self.removeSharedItem(name, containerRouteName);
             },
         };
     }
-    shouldComponentUpdate(nextProps, nextState:State) {
+    shouldComponentUpdate(nextProps, nextState: State) {
         if (this.props === nextProps) {
             const { sharedItems } = this.state;
             const nextSharedItems = nextState.sharedItems;
@@ -205,28 +215,28 @@ class MaterialSharedElementTransitioner extends Component {
         });
     }
     _renderFakedSEContainer(pairs, props: NavigationTransitionProps) {
-        const onListBBox = this._getBBox(pairs.map(p => p.onList.metrics));
-        const onDetailBBox = this._getBBox(pairs.map(p => p.onDetail.metrics));
+        const fromItemBBox = this._getBBox(pairs.map(p => p.fromItem.metrics));
+        const toItemBBox = this._getBBox(pairs.map(p => p.toItem.metrics));
         const { position, progress, navigationState: {index} } = props;
         const minIdx = Math.min(index, position._value);
         const maxIdx = Math.max(index, position._value);
         const inputRange = [minIdx, maxIdx];
         const left = position.interpolate({
             inputRange,
-            outputRange: [onListBBox.left, 0],
+            outputRange: [fromItemBBox.left, 0],
         });
         const top = position.interpolate({
             inputRange,
-            outputRange: [onListBBox.top, 0],
+            outputRange: [fromItemBBox.top, 0],
         });
         const { height: windowHeight, width: windowWidth } = Dimensions.get("window");
         const width = position.interpolate({
             inputRange,
-            outputRange: [onListBBox.width, windowWidth],
+            outputRange: [fromItemBBox.width, windowWidth],
         });
         const height = position.interpolate({
             inputRange,
-            outputRange: [onListBBox.height, windowHeight],
+            outputRange: [fromItemBBox.height, windowHeight],
         });
         const elevation = this._interpolateElevation(progress, 0);
         const style = {

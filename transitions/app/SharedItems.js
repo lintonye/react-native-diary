@@ -46,13 +46,16 @@ type ItemPair = {
 
 class SharedItems {
     _items: Array<SharedItem>;
-    constructor(initialItems: Array<SharedItem> = []) {
-        this._items = [...initialItems];
+    constructor(items: Array<SharedItem> = []) {
+        this._items = [...items];
     }
     _findIndex(name: string, containerRouteName: string): number {
         return this._items.findIndex(i => {
             return i.name === name && i.containerRouteName === containerRouteName;
         });
+    }
+    count() {
+        return this._items.length;
     }
     add(item: SharedItem): SharedItems {
         if (this._findIndex(item.name, item.containerRouteName) >= 0)
@@ -106,10 +109,16 @@ class SharedItems {
         }, new Map());
         return nameMap;
     }
+    isMeatured(p: ItemPair) {
+        const metricsValid = (m: Metrics) => m && m.x && m.y && m.width && m.height;
+        const { fromItem, toItem } = p;
+        return fromItem && toItem
+            && metricsValid(fromItem.metrics) && metricsValid(toItem.metrics);
+    }
     getMeasuredItemPairs(fromRoute: string, toRoute: string): Array<ItemPair> {
         const nameMap = this._getNamePairMap(fromRoute, toRoute);
         return Array.from(nameMap.values())
-            .filter(p => p.fromItem && p.toItem && p.fromItem.metrics && p.toItem.metrics);
+            .filter(this.isMeatured);
     }
     findMatchByName(name: string, routeToExclude: string): ?SharedItem {
         return this._items.find(i => i.name === name && i.containerRouteName !== routeToExclude);
@@ -117,7 +126,7 @@ class SharedItems {
     areMetricsReadyForAllItems(fromRoute: string, toRoute: string): boolean {
         const nameMap = this._getNamePairMap(fromRoute, toRoute);
         return Array.from(nameMap.values())
-            .every(p => p.fromItem && p.toItem && p.fromItem.metrics && p.toItem.metrics);
+            .every(this.isMeatured);
     }
 }
 

@@ -1,11 +1,13 @@
 // @flow
 
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
     View,
     UIManager,
     findNodeHandle,
 } from 'react-native';
+
+import { SharedItem } from './SharedItems';
 
 class SharedView extends Component {
     _view: any;
@@ -27,18 +29,18 @@ class SharedView extends Component {
 
         const { name, containerRouteName } = this.props;
         const nativeHandle = findNodeHandle(this._view);
-        registerSharedView({
+        registerSharedView(new SharedItem(
             name,
             containerRouteName,
+            this.render(),
             nativeHandle,
-            reactElement: this.render(),
-        });
+        ));
     }
 
     componentWillUnmount() {
         const { unregisterSharedView } = this.context;
         if (!unregisterSharedView) return;
-        
+
         const { name, containerRouteName } = this.props;
         unregisterSharedView(name, containerRouteName);
     }
