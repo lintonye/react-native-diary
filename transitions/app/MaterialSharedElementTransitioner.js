@@ -41,7 +41,6 @@ class MaterialSharedElementTransitioner extends Component {
         UIManager.measureInWindow(
             sharedItem.nativeHandle,
             (x, y, width, height) => {
-                //TODO why x,y,w,h are all undefined here?
                 this.updateMetrics(
                     sharedItem.name,
                     sharedItem.containerRouteName,
@@ -97,7 +96,7 @@ class MaterialSharedElementTransitioner extends Component {
                 }
             },
             unregisterSharedView(name: string, containerRouteName: string) {
-                console.log('Removing:', name, containerRouteName)
+                // console.log('Removing:', name, containerRouteName)
                 self.removeSharedItem(name, containerRouteName);
             },
         };
@@ -194,7 +193,7 @@ class MaterialSharedElementTransitioner extends Component {
             ],
         };
     }
-    _getBBox(metricsArray) {
+    _getBBox(metricsArray: Array<Metrics>) {
         let left = top = Number.MAX_VALUE;
         let right = bottom = Number.MIN_VALUE;
         metricsArray.forEach(m => {

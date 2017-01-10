@@ -16,8 +16,10 @@ class SharedView extends Component {
         unregisterSharedView: React.PropTypes.func,
     };
     render() {
+        // collapsable={false} is required for UIManager.measureInWindow to get the actual measurements
+        // instead of undefined, see https://github.com/facebook/react-native/issues/9382
         return (
-            <View
+            <View collapsable={false}
                 ref={c => this._view = c}>
                 {this.props.children}
             </View>
