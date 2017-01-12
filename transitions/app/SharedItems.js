@@ -37,6 +37,9 @@ export class SharedItem {
     clone() {
         return new SharedItem(this.name, this.containerRouteName, this.reactElement, this.nativeHandle, this.metrics);
     }
+    toString() {
+        return `${this.name} ${this.containerRouteName} ${JSON.stringify(this.metrics)}`;
+    }
 }
 
 type ItemPair = {
@@ -95,6 +98,7 @@ class SharedItems {
         } else return this;
     }
     _getNamePairMap(fromRoute: string, toRoute: string) {
+        //TODO cache the map. Since the object is immutable, no need to worry about updates to _items
         const nameMap = this._items.reduce((map, item) => {
             let pairByName = map.get(item.name);
             if (!pairByName) {
@@ -102,7 +106,7 @@ class SharedItems {
                 map.set(item.name, pairByName);
             }
             if (item.containerRouteName === fromRoute) pairByName.fromItem = item;
-            else if (item.containerRouteName === toRoute) pairByName.toItem = item;
+            if (item.containerRouteName === toRoute) pairByName.toItem = item;
             // delete empty pairs
             if (!pairByName.fromItem && !pairByName.toItem) map.delete(item.name);
             return map;
@@ -110,20 +114,22 @@ class SharedItems {
         return nameMap;
     }
     isMeatured(p: ItemPair) {
-        const metricsValid = (m: Metrics) => m && m.x && m.y && m.width && m.height;
+        const isNumber = n => typeof n === 'number';
+        const metricsValid = (m: Metrics) => m && [m.x, m.y, m.width, m.height].every(isNumber);
         const { fromItem, toItem } = p;
         return fromItem && toItem
             && metricsValid(fromItem.metrics) && metricsValid(toItem.metrics);
     }
     getMeasuredItemPairs(fromRoute: string, toRoute: string): Array<ItemPair> {
         const nameMap = this._getNamePairMap(fromRoute, toRoute);
+        // console.log('getMeasuredItemPairs.nameMap', Array.from(nameMap.values()).map(p => `fromItem:${p.fromItem ? p.fromItem.toString() : 'null'} toItem:${p.toItem ? p.toItem.toString() : 'null'}`));
         return Array.from(nameMap.values())
             .filter(this.isMeatured);
     }
     findMatchByName(name: string, routeToExclude: string): ?SharedItem {
         return this._items.find(i => i.name === name && i.containerRouteName !== routeToExclude);
     }
-    areMetricsReadyForAllItems(fromRoute: string, toRoute: string): boolean {
+    areMetricsReadyForAllPairs(fromRoute: string, toRoute: string): boolean {
         const nameMap = this._getNamePairMap(fromRoute, toRoute);
         return Array.from(nameMap.values())
             .every(this.isMeatured);

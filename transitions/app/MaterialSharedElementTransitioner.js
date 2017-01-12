@@ -54,6 +54,7 @@ class MaterialSharedElementTransitioner extends Component {
         ), callback);
     }
     updateMetrics(name: string, containerRouteName: string, metrics: Metrics) {
+        console.log('updating metrics', metrics, 'name', name, 'route', containerRouteName);
         this.setSharedItemsState(prevState =>
             prevState.sharedItems.updateMetrics(name, containerRouteName, metrics)
         );
@@ -110,7 +111,7 @@ class MaterialSharedElementTransitioner extends Component {
             const fromRoute = routeName(this.props.navigationState);
             const toRoute = routeName(nextProps.navigationState);
             //TODO perhaps there are other things on the state?
-            return sharedItems !== nextSharedItems && nextSharedItems.areMetricsReadyForAllItems(fromRoute, toRoute);
+            return sharedItems !== nextSharedItems && nextSharedItems.areMetricsReadyForAllPairs(fromRoute, toRoute);
         } else return true;
     }
     onTransitionEnd() {
@@ -271,6 +272,9 @@ class MaterialSharedElementTransitioner extends Component {
                 </Animated.View>
             );
         });
+        // const pairsStr = pairs.map(p => Object.keys(p).map(k => `${k}: ${JSON.stringify(p[k].metrics)}`))
+        // console.log('from:', fromRoute, 'to:', toRoute, 'pairs:', pairsStr, 'allReady?:', this.state.sharedItems.areMetricsReadyForAllPairs(fromRoute, toRoute), 'items:', this.state.sharedItems._items.filter(i => i.metrics).map(i => `${i.name.slice(i.name.lastIndexOf('?'))} ${i.containerRouteName} ${JSON.stringify(i.metrics)}`));
+        // console.log(this.state.sharedItems._items.map(i => `${i.name} ${i.containerRouteName} ${JSON.stringify(i.metrics)}`))
 
         const containerStyle = this._getOverlayContainerStyle(props.progress);
         return (

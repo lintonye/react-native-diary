@@ -88,7 +88,7 @@ describe('SharedItems', () => {
     });
     describe('getMeasuredItemPairs', () => {
         it('only returns measured pairs', () => {
-            const metrics = { x: 1, y: 2 };
+            const metrics = { x: 1, y: 2, width:3, height: 4 };
             const item1 = new SharedItem('shared1', 'route1', 'reactElement', 'nativeHandle', metrics);
             const item2 = new SharedItem('shared1', 'route2', 'reactElement', 'nativeHandle', metrics);
             const itemNoMetrics1 = new SharedItem('shared2', 'route1');
@@ -98,7 +98,7 @@ describe('SharedItems', () => {
             expect(pairs.length).toBe(1);
         });
         it('only returns pairs based on given route names', () => {
-            const metrics = { x: 1, y: 2 };
+            const metrics = { x: 1, y: 2, width:3, height: 4 };
             const item1 = new SharedItem('shared1', 'route1', 'reactElement', 'nativeHandle', metrics);
             const item2 = new SharedItem('shared1', 'route2', 'reactElement', 'nativeHandle', metrics);
             const itemOtherRoute1 = new SharedItem('shared2', 'route3', 'reactElement', 'nativeHandle', metrics);
@@ -111,7 +111,7 @@ describe('SharedItems', () => {
             expect(p.toItem).toBe(item2);
         });
         it('does not return unmatched items', () => {
-            const metrics = { x: 1, y: 2 };
+            const metrics = { x: 1, y: 2, width:3, height: 4 };
             const item1 = new SharedItem('shared1', 'route1', 'reactElement', 'nativeHandle', metrics);
             const items = new SharedItems([item1]);
             const pairs = items.getMeasuredItemPairs('route1', 'route2');
@@ -145,7 +145,7 @@ describe('SharedItems', () => {
             const item3 = new SharedItem('shared2', 'route1', 'reactElement', 'nativeHandle', metrics);
             const item4 = new SharedItem('shared2', 'route2', 'reactElement', 'nativeHandle', metrics);
             const items = new SharedItems([item1, item2, item3, item4]);
-            expect(items.areMetricsReadyForAllItems('route1', 'route2')).toBe(true);
+            expect(items.areMetricsReadyForAllPairs('route1', 'route2')).toBe(true);
         });
         it('returns false if some item does not contain metrics', () => {
             const metrics = { x: 1, y: 2, width: 3, height: 4 };
@@ -154,7 +154,7 @@ describe('SharedItems', () => {
             const item3 = new SharedItem('shared2', 'route1', 'reactElement', 'nativeHandle', metrics);
             const item4 = new SharedItem('shared2', 'route2', 'reactElement', 'nativeHandle', metrics);
             const items = new SharedItems([item1, item2, item3, item4]);
-            expect(items.areMetricsReadyForAllItems('route1', 'route2')).toBe(false);
+            expect(items.areMetricsReadyForAllPairs('route1', 'route2')).toBe(false);
         });
         it('returns true if all pairs contain metrics and other routes contain unmeasured items', () => {
             const metrics = { x: 1, y: 2, width: 3, height: 4 };
@@ -163,7 +163,7 @@ describe('SharedItems', () => {
             const item3 = new SharedItem('shared2', 'route3', 'reactElement', 'nativeHandle', metrics);
             const item4 = new SharedItem('shared2', 'route4', 'reactElement', 'nativeHandle', metrics);
             const items = new SharedItems([item1, item2, item3, item4]);
-            expect(items.areMetricsReadyForAllItems('route1', 'route2')).toBe(true);
+            expect(items.areMetricsReadyForAllPairs('route1', 'route2')).toBe(true);
         });
     })
 })
