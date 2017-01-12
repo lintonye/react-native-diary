@@ -14,7 +14,7 @@ import type {NavigationTransitionProps } from 'NavigationTypeDefinition';
 
 import SharedItems from './SharedItems';
 
-import type { Metrics, SharedItem } from './SharedItems';
+import type { Metrics, SharedItem, UpdateRequest } from './SharedItems';
 
 const {
     Transitioner,
@@ -22,6 +22,7 @@ const {
 
 type State = {
     sharedItems: SharedItems,
+    itemsToMeasure: Array<SharedItem>,
 }
 
 class MaterialSharedElementTransitioner extends Component {
@@ -34,29 +35,29 @@ class MaterialSharedElementTransitioner extends Component {
         super(props);
         this.state = {
             sharedItems: new SharedItems(),
+            itemsToMeasure: [],
         }
     }
-    measureAndUpdate(sharedItem: SharedItem) {
+    measure(sharedItem: SharedItem):Promise<Metrics> {
         // console.log('measuring:', sharedItem.name, sharedItem.containerRouteName)
-        UIManager.measureInWindow(
-            sharedItem.nativeHandle,
-            (x, y, width, height) => {
-                this.updateMetrics(
-                    sharedItem.name,
-                    sharedItem.containerRouteName,
-                    { x, y, width, height });
-            }
-        );
+        return new Promise((resolve, reject) => {
+            UIManager.measureInWindow(
+                sharedItem.nativeHandle,
+                (x, y, width, height) => {
+                    resolve({x, y, width, height});
+                }
+            );
+        });
     }
     setSharedItemsState(fun: (prevState: State) => SharedItems, callback) {
         this.setState((prevState, props) => (
             { sharedItems: fun(prevState) }
         ), callback);
     }
-    updateMetrics(name: string, containerRouteName: string, metrics: Metrics) {
-        console.log('updating metrics', metrics, 'name', name, 'route', containerRouteName);
+    updateMetrics(requests: Array<UpdateRequest>) {
+        console.log('updating metrics', requests);
         this.setSharedItemsState(prevState =>
-            prevState.sharedItems.updateMetrics(name, containerRouteName, metrics)
+            prevState.sharedItems.updateMetrics(requests)
         );
     }
     addSharedItem(sharedItem: SharedItem) {
@@ -92,8 +93,7 @@ class MaterialSharedElementTransitioner extends Component {
                 // console.log(self.state.sharedItems._items.map(i => i.name))
                 // console.log('registering:', sharedItem.name, sharedItem.containerRouteName, 'matchingItem=',matchingItem, 'items.count()', self.state.sharedItems.count())
                 if (matchingItem) {
-                    self.measureAndUpdate(sharedItem);
-                    self.measureAndUpdate(matchingItem);
+                    self.setState({ itemsToMeasure: [sharedItem, matchingItem] });
                 }
             },
             unregisterSharedView(name: string, containerRouteName: string) {
@@ -111,27 +111,42 @@ class MaterialSharedElementTransitioner extends Component {
             const fromRoute = routeName(this.props.navigationState);
             const toRoute = routeName(nextProps.navigationState);
             //TODO perhaps there are other things on the state?
-            return sharedItems !== nextSharedItems && nextSharedItems.areMetricsReadyForAllPairs(fromRoute, toRoute);
+            return sharedItems !== nextSharedItems
+            //TODO perhaps the following conditions are equivalent?
+                // && nextSharedItems.areMetricsReadyForAllPairs(fromRoute, toRoute)
+                && nextState.itemsToMeasure.length === 0;
         } else return true;
     }
     onTransitionEnd() {
         this.removeAllMetrics();
     }
+    async _onLayout() {
+        let toUpdate = [];
+        for (let item of this.state.itemsToMeasure) {
+            const { name, containerRouteName } = item;
+            const metrics = await this.measure(item);
+            toUpdate.push({name, containerRouteName, metrics});
+        }
+        this.setState({ itemsToMeasure: []});
+        this.updateMetrics(toUpdate);
+    }
     render() {
         return (
-            <Transitioner
-                configureTransition={this._configureTransition.bind(this)}
-                render={this._render.bind(this)}
-                navigationState={this.props.navigationState}
-                style={this.props.style}
-                onTransitionEnd={this.onTransitionEnd.bind(this)}
-                />
+            <View style={{ flex: 1 }} onLayout={this._onLayout.bind(this)}>
+                <Transitioner
+                    configureTransition={this._configureTransition.bind(this)}
+                    render={this._render.bind(this)}
+                    navigationState={this.props.navigationState}
+                    style={this.props.style}
+                    onTransitionEnd={this.onTransitionEnd.bind(this)}
+                    />
+            </View>
         );
     }
     _configureTransition() {
         return {
             duration: 300,
-            useNativeDriver: false,
+            // useNativeDriver: false,
         }
     }
     _render(props: NavigationTransitionProps, prevProps: NavigationTransitionProps) {
