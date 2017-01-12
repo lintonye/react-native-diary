@@ -47,21 +47,47 @@ describe('SharedItems', () => {
         it('returns new instance if found an item to update', () => {
             const item = new SharedItem('sharedView', 'route');
             const items = new SharedItems([item]);
-            const newItems = items.updateMetrics(item.name, item.containerRouteName, { x: 1, y: 2 });
+            const {name, containerRouteName} = item;
+            const newItems = items.updateMetrics([{name, containerRouteName, metrics:{ x: 1, y: 2 }}]);
             expect(items).not.toBe(newItems);
         });
         it('returns same instance if item not found', () => {
             const item = new SharedItem('sharedView', 'route');
             const items = new SharedItems([item]);
-            const newItems = items.updateMetrics('blah', item.containerRouteName, { x: 1, y: 2 });
+            const newItems = items.updateMetrics([{name: 'blah', containerRouteName: item.containerRouteName, metrics: { x: 1, y: 2 }}]);
             expect(items).toBe(newItems);
         });
         it('update item properly', () => {
             const item = new SharedItem('sharedView', 'route');
             const items = new SharedItems([item]);
             const metrics = { x: 1, y: 2 };
-            const newItems = items.updateMetrics(item.name, item.containerRouteName, metrics);
+            const {name, containerRouteName} = item;
+            const newItems = items.updateMetrics([{name, containerRouteName, metrics}]);
             expect(newItems._items[0].metrics).toBe(metrics);
+        })
+        it('update multiple items', () => {
+            const item1 = new SharedItem('sharedView', 'route');
+            const item2 = new SharedItem('sharedView2', 'route');
+            const items = new SharedItems([item1, item2]);
+            const metrics = { x: 1, y: 2 };
+            const requests = [
+                {name: item1.name, containerRouteName: item1.containerRouteName, metrics},
+                {name: item2.name, containerRouteName: item2.containerRouteName, metrics},
+            ]
+            const newItems = items.updateMetrics(requests);
+            expect(newItems._items[0].metrics).toBe(metrics);
+            expect(newItems._items[1].metrics).toBe(metrics);
+        })
+        it('does not update items not in requests', () => {
+            const item1 = new SharedItem('sharedView', 'route');
+            const item2 = new SharedItem('sharedView2', 'route');
+            const items = new SharedItems([item1, item2]);
+            const metrics = { x: 1, y: 2 };
+            const requests = [
+                {name: item1.name, containerRouteName: item1.containerRouteName, metrics},
+            ]
+            const newItems = items.updateMetrics(requests);
+            expect(newItems._items.filter(i => i.metrics).length).toBe(1);
         })
     })
     describe('removeAllMetrics', () => {

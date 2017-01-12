@@ -47,6 +47,12 @@ type ItemPair = {
     toItem: SharedItem,
 };
 
+export type UpdateRequest = {
+    name: string,
+    containerRouteName: string,
+    metrics: Metrics,
+}
+
 class SharedItems {
     _items: Array<SharedItem>;
     constructor(items: Array<SharedItem> = []) {
@@ -76,17 +82,26 @@ class SharedItems {
             return this;
         }
     }
-    updateMetrics(name: string, containerRouteName: string, metrics: Metrics): SharedItems {
-        const index = this._findIndex(name, containerRouteName);
-        if (index >= 0) {
-            const newItem = this._items[index].clone();
-            newItem.metrics = metrics;
-            const newItems = [...this._items.slice(0, index), newItem, ...this._items.slice(index + 1)];
+    updateMetrics(request: Array<UpdateRequest>): SharedItems {
+        const indexedRequests = request.map(r => ({
+            ...r,
+            index: this._findIndex(r.name, r.containerRouteName),
+        }));
+
+        if (indexedRequests.every(r => r.index < 0)) return this;
+        else {
+            let newItems = Array.from(this._items);
+            indexedRequests.forEach(r => {
+                if (r.index >= 0) {
+                    const newItem = newItems[r.index].clone();
+                    newItem.metrics = r.metrics;
+                    newItems[r.index] = newItem;
+                }
+            });
             return new SharedItems(newItems);
-        } else {
-            return this;
         }
     }
+
     removeAllMetrics(): SharedItems {
         if (this._items.some(i => !!i.metrics)) {
             const newItems = this._items.map(item => {
