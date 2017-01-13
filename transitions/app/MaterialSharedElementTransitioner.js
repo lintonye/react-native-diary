@@ -38,13 +38,13 @@ class MaterialSharedElementTransitioner extends Component {
             itemsToMeasure: [],
         }
     }
-    measure(sharedItem: SharedItem):Promise<Metrics> {
+    measure(sharedItem: SharedItem): Promise<Metrics> {
         // console.log('measuring:', sharedItem.name, sharedItem.containerRouteName)
         return new Promise((resolve, reject) => {
             UIManager.measureInWindow(
                 sharedItem.nativeHandle,
                 (x, y, width, height) => {
-                    resolve({x, y, width, height});
+                    resolve({ x, y, width, height });
                 }
             );
         });
@@ -112,23 +112,25 @@ class MaterialSharedElementTransitioner extends Component {
             const toRoute = routeName(nextProps.navigationState);
             //TODO perhaps there are other things on the state?
             return sharedItems !== nextSharedItems
-            //TODO perhaps the following conditions are equivalent?
+                //TODO perhaps the following conditions are equivalent?
                 // && nextSharedItems.areMetricsReadyForAllPairs(fromRoute, toRoute)
                 && nextState.itemsToMeasure.length === 0;
         } else return true;
     }
     onTransitionEnd() {
-        this.removeAllMetrics();
+        // this.removeAllMetrics();
     }
     async _onLayout() {
         let toUpdate = [];
         for (let item of this.state.itemsToMeasure) {
             const { name, containerRouteName } = item;
             const metrics = await this.measure(item);
-            toUpdate.push({name, containerRouteName, metrics});
+            toUpdate.push({ name, containerRouteName, metrics });
         }
-        this.setState({ itemsToMeasure: []});
-        this.updateMetrics(toUpdate);
+        if (toUpdate.length > 0) {
+            this.setState({ itemsToMeasure: [] });
+            this.updateMetrics(toUpdate);
+        }
     }
     render() {
         return (
@@ -168,31 +170,32 @@ class MaterialSharedElementTransitioner extends Component {
             left,
         };
     }
-    _getSharedElementStyle(props: NavigationTransitionProps, itemFrom, itemTo) {
+    _getSharedElementStyle(props, prevProps, itemFrom, itemTo) {
         const { position, progress, navigationState: {index} } = props;
+        const prevIndex = prevProps.navigationState.index;
         const toVsFromScaleX = itemTo.scaleRelativeTo(itemFrom).x;
         const toVsFromScaleY = itemTo.scaleRelativeTo(itemFrom).y;
-        //TODO use prevProps.navigationState.index instead of position._value
-        const minIdx = Math.min(index, position._value);
-        const maxIdx = Math.max(index, position._value);
+        const minIdx = Math.min(index, prevIndex);
+        const maxIdx = Math.max(index, prevIndex);
         const inputRange = [minIdx, maxIdx];
+        const adaptRange = (range) => index > prevIndex ? range : range.reverse();
         const scaleX = position.interpolate({
             inputRange,
-            outputRange: [1, toVsFromScaleX],
+            outputRange: adaptRange([1, toVsFromScaleX]),
         });
         const scaleY = position.interpolate({
             inputRange,
-            outputRange: [1, toVsFromScaleY],
+            outputRange: adaptRange([1, toVsFromScaleY]),
         });
         const width = itemFrom.metrics.width;
         const height = itemFrom.metrics.height;
         const left = position.interpolate({
             inputRange,
-            outputRange: [itemFrom.metrics.x, itemTo.metrics.x + width / 2 * (toVsFromScaleX - 1)],
+            outputRange: adaptRange([itemFrom.metrics.x, itemTo.metrics.x + width / 2 * (toVsFromScaleX - 1)]),
         });
         const top = position.interpolate({
             inputRange,
-            outputRange: [itemFrom.metrics.y, itemTo.metrics.y + height / 2 * (toVsFromScaleY - 1)],
+            outputRange: adaptRange([itemFrom.metrics.y, itemTo.metrics.y + height / 2 * (toVsFromScaleY - 1)]),
         });
         return {
             width,
@@ -229,30 +232,33 @@ class MaterialSharedElementTransitioner extends Component {
             outputRange: [5 + base, 25 + base],
         });
     }
-    _renderFakedSEContainer(pairs, props: NavigationTransitionProps) {
+    _renderFakedSEContainer(pairs, props, prevProps) {
+        if (!prevProps) return null;
+
         const fromItemBBox = this._getBBox(pairs.map(p => p.fromItem.metrics));
         const toItemBBox = this._getBBox(pairs.map(p => p.toItem.metrics));
         const { position, progress, navigationState: {index} } = props;
-        //TODO use prevProps.navigationState.index instead of position._value
-        const minIdx = Math.min(index, position._value);
-        const maxIdx = Math.max(index, position._value);
+        const prevIndex = prevProps.navigationState.index;
+        const minIdx = Math.min(index, prevIndex);
+        const maxIdx = Math.max(index, prevIndex);
         const inputRange = [minIdx, maxIdx];
+        const adaptRange = (range) => index > prevIndex ? range : range.reverse();
         const left = position.interpolate({
             inputRange,
-            outputRange: [fromItemBBox.left, 0],
+            outputRange: adaptRange([fromItemBBox.left, toItemBBox.left]),
         });
         const top = position.interpolate({
             inputRange,
-            outputRange: [fromItemBBox.top, 0],
+            outputRange: adaptRange([fromItemBBox.top, toItemBBox.top]),
         });
         const { height: windowHeight, width: windowWidth } = Dimensions.get("window");
         const width = position.interpolate({
             inputRange,
-            outputRange: [fromItemBBox.width, windowWidth],
+            outputRange: [index > prevIndex ? fromItemBBox.width : toItemBBox.width, windowWidth],
         });
         const height = position.interpolate({
             inputRange,
-            outputRange: [fromItemBBox.height, windowHeight],
+            outputRange: [index > prevIndex ? fromItemBBox.height : toItemBBox.height, windowHeight],
         });
         const elevation = this._interpolateElevation(progress, 0);
         const style = {
@@ -275,7 +281,7 @@ class MaterialSharedElementTransitioner extends Component {
         const pairs = this.state.sharedItems.getMeasuredItemPairs(fromRoute, toRoute);
         const sharedElements = pairs.map((pair, idx) => {
             const {fromItem, toItem} = pair;
-            const animatedStyle = this._getSharedElementStyle(props, fromItem, toItem);
+            const animatedStyle = this._getSharedElementStyle(props, prevProps, fromItem, toItem);
             const element = fromItem.reactElement;
             const cloned = React.cloneElement(element, {
                 onLayout: null,
@@ -295,7 +301,7 @@ class MaterialSharedElementTransitioner extends Component {
         return (
             <Animated.View style={[styles.overlay, this.props.style, containerStyle]}>
                 {sharedElements}
-                {this._renderFakedSEContainer(pairs, props)}
+                {this._renderFakedSEContainer(pairs, props, prevProps)}
             </Animated.View>
         );
     }
