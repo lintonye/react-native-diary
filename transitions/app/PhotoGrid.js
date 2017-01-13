@@ -18,8 +18,24 @@ const ds = new ListView.DataSource({
     rowHasChanged: (r1, r2) => r1 !== r2,
 });
 
+const images = [
+    require('./images/img1.jpg'),
+    require('./images/img2.jpg'),
+    require('./images/img3.jpg'),
+    require('./images/img4.jpg'),
+    require('./images/img5.jpg'),
+    require('./images/img6.jpg'),
+    require('./images/img7.jpg'),
+    require('./images/img8.jpg'),
+    require('./images/img9.jpg'),
+    require('./images/img10.jpg'),
+    require('./images/img11.jpg'),
+    require('./images/img12.jpg'),
+]
+
 const photos = Array(50).fill(0).map(_ => ({
     url: faker.image.animals(500, 500, true),
+    image: images[faker.random.number(images.length-1)],
     title: faker.name.findName(),
     description: faker.lorem.paragraphs(4),
 }));
@@ -53,7 +69,7 @@ class PhotoGrid extends Component {
             <TouchableNativeFeedback onPress={() => onPhotoPressed(photo)} key={photo.url}>
                 <View style={styles.cell}>
                     <SharedView name={`image-${photo.url}`} containerRouteName='ROUTE_PHOTO_GRID'>
-                        <Image source={{ uri: photo.url }} style={styles.image}/>
+                        <Image source={photo.image} style={styles.image}/>
                     </SharedView>
                 </View>
             </TouchableNativeFeedback>
