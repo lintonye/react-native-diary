@@ -107,7 +107,7 @@ class MaterialSharedElementTransitioner extends Component {
             const { sharedItems } = this.state;
             const nextSharedItems = nextState.sharedItems;
             // TODO key => routeName
-            const routeName = (navState) => navState.routes[navState.index];
+            const routeName = (navState) => navState.routes[navState.index].key;
             const fromRoute = routeName(this.props.navigationState);
             const toRoute = routeName(nextProps.navigationState);
             //TODO perhaps there are other things on the state?
