@@ -13,7 +13,6 @@ import type {NavigationRoute } from 'react-native';
 import PhotoGridScreen from './PhotoGridScreen';
 import PhotoDetail from './PhotoDetail';
 import SettingsScreen from './SettingsScreen';
-import SharedElementTransitioner from './SharedElementTransitioner';
 import MaterialSharedElementTransitioner from './MaterialSharedElementTransitioner';
 import CrossFadeTransitioner from './CrossFadeTransitioner';
 import AndroidDefaultTransitioner from './AndroidDefaultTransitioner';
@@ -28,7 +27,7 @@ class MyNavigator extends Component {
         navigation: {
             routes: Array<NavigationRoute>
         },
-        transition: 'cardStack' | 'sharedElement' | 'materialSharedElement' | 'crossFade' | 'androidDefault',
+        transition: 'cardStack' | 'materialSharedElement' | 'crossFade' | 'androidDefault',
         duration: number,
     }
     constructor(props) {
@@ -57,7 +56,6 @@ class MyNavigator extends Component {
     render() {
         const transitionMap = {
             cardStack: CardStack,
-            sharedElement: SharedElementTransitioner,
             materialSharedElement: MaterialSharedElementTransitioner,
             crossFade: CrossFadeTransitioner,
             androidDefault: AndroidDefaultTransitioner,
