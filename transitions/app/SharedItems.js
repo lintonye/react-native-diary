@@ -50,7 +50,7 @@ type ItemPair = {
 export type UpdateRequest = {
     name: string,
     containerRouteName: string,
-    metrics: Metrics,
+    metrics: ?Metrics,
 }
 
 class SharedItems {
@@ -82,8 +82,8 @@ class SharedItems {
             return this;
         }
     }
-    updateMetrics(request: Array<UpdateRequest>): SharedItems {
-        const indexedRequests = request.map(r => ({
+    updateMetrics(requests: Array<UpdateRequest>): SharedItems {
+        const indexedRequests = requests.map(r => ({
             ...r,
             index: this._findIndex(r.name, r.containerRouteName),
         }));
