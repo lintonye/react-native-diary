@@ -8,6 +8,7 @@ import {
     Text,
     Dimensions,
     UIManager,
+    InteractionManager,
 } from 'react-native';
 
 import type {NavigationTransitionProps } from 'NavigationTypeDefinition';
@@ -54,30 +55,14 @@ class MaterialSharedElementTransitioner extends Component {
             { sharedItems: fun(prevState) }
         ), callback);
     }
-    updateMetrics(requests: Array<UpdateRequest>) {
-        console.log('updating metrics', requests);
-        this.setSharedItemsState(prevState =>
-            prevState.sharedItems.updateMetrics(requests)
-        );
-    }
     addSharedItem(sharedItem: SharedItem) {
         this.setSharedItemsState(prevState =>
             prevState.sharedItems.add(sharedItem)
         );
-        // const newItems = this.state.sharedItems.add(sharedItem);
-        // this.setSharedItemsState(
-        //     newItems,
-        //     () => {console.log(`name=${sharedItem.name} this.state.items=`, this.state.sharedItems._items.map(i=>i.name), 'newItems', newItems._items.map(i=>i.name))}
-        // );
     }
     removeSharedItem(name: string, containerRouteName: string) {
         this.setSharedItemsState(prevState =>
             prevState.sharedItems.remove(name, containerRouteName)
-        );
-    }
-    removeAllMetrics() {
-        this.setSharedItemsState(prevState =>
-            prevState.sharedItems.removeAllMetrics()
         );
     }
     getChildContext() {
@@ -103,22 +88,15 @@ class MaterialSharedElementTransitioner extends Component {
         };
     }
     shouldComponentUpdate(nextProps, nextState: State) {
-        if (this.props === nextProps) {
-            const { sharedItems } = this.state;
-            const nextSharedItems = nextState.sharedItems;
-            // TODO key => routeName
-            const routeName = (navState) => navState.routes[navState.index].key;
-            const fromRoute = routeName(this.props.navigationState);
-            const toRoute = routeName(nextProps.navigationState);
-            //TODO perhaps there are other things on the state?
-            return sharedItems !== nextSharedItems
-                //TODO perhaps the following conditions are equivalent?
-                // && nextSharedItems.areMetricsReadyForAllPairs(fromRoute, toRoute)
-                && nextState.itemsToMeasure.length === 0;
-        } else return true;
-    }
-    onTransitionEnd() {
-        // this.removeAllMetrics();
+        /*
+          state / prop changes
+          - navigation change: nextProps !== this.props                       => true
+          - onLayout: state: itemsToMeasure, sharedItems.metrics              => measured?
+          - afterInteraction: state: itemsToMeasure, sharedElements.metrics   => false
+          - register: state.sharedElements, state.itemsToMeasure              => false
+          - unregister: statee.sharedElements                                 => false
+        */
+        return this.props !== nextProps || nextState.itemsToMeasure.length === 0;
     }
     async _onLayout() {
         let toUpdate = [];
@@ -128,8 +106,11 @@ class MaterialSharedElementTransitioner extends Component {
             toUpdate.push({ name, containerRouteName, metrics });
         }
         if (toUpdate.length > 0) {
-            this.setState({ itemsToMeasure: [] });
-            this.updateMetrics(toUpdate);
+            // console.log('measured, setting meatured state:', toUpdate)
+            this.setState((prevState: State) => ({
+                sharedItems: prevState.sharedItems.updateMetrics(toUpdate),
+                itemsToMeasure: [],
+            }));
         }
     }
     render() {
@@ -140,7 +121,6 @@ class MaterialSharedElementTransitioner extends Component {
                     render={this._render.bind(this)}
                     navigationState={this.props.navigationState}
                     style={this.props.style}
-                    onTransitionEnd={this.onTransitionEnd.bind(this)}
                     />
             </View>
         );
@@ -296,7 +276,6 @@ class MaterialSharedElementTransitioner extends Component {
         // const pairsStr = pairs.map(p => Object.keys(p).map(k => `${k}: ${JSON.stringify(p[k].metrics)}`))
         // console.log('from:', fromRoute, 'to:', toRoute, 'pairs:', pairsStr, 'allReady?:', this.state.sharedItems.areMetricsReadyForAllPairs(fromRoute, toRoute), 'items:', this.state.sharedItems._items.filter(i => i.metrics).map(i => `${i.name.slice(i.name.lastIndexOf('?'))} ${i.containerRouteName} ${JSON.stringify(i.metrics)}`));
         // console.log(this.state.sharedItems._items.map(i => `${i.name} ${i.containerRouteName} ${JSON.stringify(i.metrics)}`))
-
         const containerStyle = this._getOverlayContainerStyle(props.progress);
         return (
             <Animated.View style={[styles.overlay, this.props.style, containerStyle]}>
