@@ -69,20 +69,16 @@ class MaterialSharedElementTransitioner extends Component {
         const self = this;
         return {
             registerSharedView(sharedItem: SharedItem) {
-                // add to the state
                 self.addSharedItem(sharedItem);
-                // measure using UIManager if another view with the same name is mounted
                 const {name, containerRouteName} = sharedItem;
 
                 const matchingItem = self.state.sharedItems.findMatchByName(name, containerRouteName);
-                // console.log(self.state.sharedItems._items.map(i => i.name))
-                // console.log('registering:', sharedItem.name, sharedItem.containerRouteName, 'matchingItem=',matchingItem, 'items.count()', self.state.sharedItems.count())
+                // schedule to measure (on layout) if another view with the same name is mounted
                 if (matchingItem) {
                     self.setState({ itemsToMeasure: [sharedItem, matchingItem] });
                 }
             },
             unregisterSharedView(name: string, containerRouteName: string) {
-                // console.log('Removing:', name, containerRouteName)
                 self.removeSharedItem(name, containerRouteName);
             },
         };
