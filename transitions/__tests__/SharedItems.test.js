@@ -48,13 +48,13 @@ describe('SharedItems', () => {
             const item = new SharedItem('sharedView', 'route');
             const items = new SharedItems([item]);
             const {name, containerRouteName} = item;
-            const newItems = items.updateMetrics([{name, containerRouteName, metrics:{ x: 1, y: 2 }}]);
+            const newItems = items.updateMetrics([{ name, containerRouteName, metrics: { x: 1, y: 2 } }]);
             expect(items).not.toBe(newItems);
         });
         it('returns same instance if item not found', () => {
             const item = new SharedItem('sharedView', 'route');
             const items = new SharedItems([item]);
-            const newItems = items.updateMetrics([{name: 'blah', containerRouteName: item.containerRouteName, metrics: { x: 1, y: 2 }}]);
+            const newItems = items.updateMetrics([{ name: 'blah', containerRouteName: item.containerRouteName, metrics: { x: 1, y: 2 } }]);
             expect(items).toBe(newItems);
         });
         it('update item properly', () => {
@@ -62,7 +62,7 @@ describe('SharedItems', () => {
             const items = new SharedItems([item]);
             const metrics = { x: 1, y: 2 };
             const {name, containerRouteName} = item;
-            const newItems = items.updateMetrics([{name, containerRouteName, metrics}]);
+            const newItems = items.updateMetrics([{ name, containerRouteName, metrics }]);
             expect(newItems._items[0].metrics).toBe(metrics);
         })
         it('update multiple items', () => {
@@ -71,8 +71,8 @@ describe('SharedItems', () => {
             const items = new SharedItems([item1, item2]);
             const metrics = { x: 1, y: 2 };
             const requests = [
-                {name: item1.name, containerRouteName: item1.containerRouteName, metrics},
-                {name: item2.name, containerRouteName: item2.containerRouteName, metrics},
+                { name: item1.name, containerRouteName: item1.containerRouteName, metrics },
+                { name: item2.name, containerRouteName: item2.containerRouteName, metrics },
             ]
             const newItems = items.updateMetrics(requests);
             expect(newItems._items[0].metrics).toBe(metrics);
@@ -84,10 +84,23 @@ describe('SharedItems', () => {
             const items = new SharedItems([item1, item2]);
             const metrics = { x: 1, y: 2 };
             const requests = [
-                {name: item1.name, containerRouteName: item1.containerRouteName, metrics},
+                { name: item1.name, containerRouteName: item1.containerRouteName, metrics },
             ]
             const newItems = items.updateMetrics(requests);
             expect(newItems._items.filter(i => i.metrics).length).toBe(1);
+        })
+        it('remove metrics', () => {
+            const metrics = { x: 1, y: 2 };
+            const item1 = new SharedItem('sharedView', 'route', 'reactElement', 'nativeHandle', metrics);
+            const item2 = new SharedItem('sharedView2', 'route', 'reactElement', 'nativeHandle', metrics);
+            const items = new SharedItems([item1, item2]);
+            const requests = [
+                { name: item1.name, containerRouteName: item1.containerRouteName, metrics: null },
+                { name: item2.name, containerRouteName: item2.containerRouteName, metrics: null },
+            ]
+            const newItems = items.updateMetrics(requests);
+            expect(newItems._items[0].metrics).toBeNull();
+            expect(newItems._items[1].metrics).toBeNull();
         })
     })
     describe('removeAllMetrics', () => {
@@ -114,7 +127,7 @@ describe('SharedItems', () => {
     });
     describe('getMeasuredItemPairs', () => {
         it('only returns measured pairs', () => {
-            const metrics = { x: 1, y: 2, width:3, height: 4 };
+            const metrics = { x: 1, y: 2, width: 3, height: 4 };
             const item1 = new SharedItem('shared1', 'route1', 'reactElement', 'nativeHandle', metrics);
             const item2 = new SharedItem('shared1', 'route2', 'reactElement', 'nativeHandle', metrics);
             const itemNoMetrics1 = new SharedItem('shared2', 'route1');
@@ -124,7 +137,7 @@ describe('SharedItems', () => {
             expect(pairs.length).toBe(1);
         });
         it('only returns pairs based on given route names', () => {
-            const metrics = { x: 1, y: 2, width:3, height: 4 };
+            const metrics = { x: 1, y: 2, width: 3, height: 4 };
             const item1 = new SharedItem('shared1', 'route1', 'reactElement', 'nativeHandle', metrics);
             const item2 = new SharedItem('shared1', 'route2', 'reactElement', 'nativeHandle', metrics);
             const itemOtherRoute1 = new SharedItem('shared2', 'route3', 'reactElement', 'nativeHandle', metrics);
@@ -137,7 +150,7 @@ describe('SharedItems', () => {
             expect(p.toItem).toBe(item2);
         });
         it('does not return unmatched items', () => {
-            const metrics = { x: 1, y: 2, width:3, height: 4 };
+            const metrics = { x: 1, y: 2, width: 3, height: 4 };
             const item1 = new SharedItem('shared1', 'route1', 'reactElement', 'nativeHandle', metrics);
             const items = new SharedItems([item1]);
             const pairs = items.getMeasuredItemPairs('route1', 'route2');
