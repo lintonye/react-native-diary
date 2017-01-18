@@ -276,6 +276,20 @@ class MaterialSharedElementTransitioner extends Component {
         // const pairsStr = pairs.map(p => Object.keys(p).map(k => `${k}: ${JSON.stringify(p[k].metrics)}`))
         // console.log('from:', fromRoute, 'to:', toRoute, 'pairs:', pairsStr, 'allReady?:', this.state.sharedItems.areMetricsReadyForAllPairs(fromRoute, toRoute), 'items:', this.state.sharedItems._items.filter(i => i.metrics).map(i => `${i.name.slice(i.name.lastIndexOf('?'))} ${i.containerRouteName} ${JSON.stringify(i.metrics)}`));
         // console.log(this.state.sharedItems._items.map(i => `${i.name} ${i.containerRouteName} ${JSON.stringify(i.metrics)}`))
+        if (pairs.length > 0) {
+            InteractionManager.runAfterInteractions(() => {
+                this.setState((prevState: State) => ({
+                    // remove metrics of sharedViews on the target scene so that it'll be re-measured when moving to the next scene.
+                    // This guarantees the location of the cloned view on the overlay is always consistent with the original view.
+                    sharedItems: prevState.sharedItems.updateMetrics(pairs.map(p => ({
+                        name: p.toItem.name,
+                        containerRouteName: p.toItem.containerRouteName,
+                        metrics: null,
+                    }))),
+                    itemsToMeasure: pairs.map(p => p.toItem),
+                }));
+            });
+        }
         const containerStyle = this._getOverlayContainerStyle(props.progress);
         return (
             <Animated.View style={[styles.overlay, this.props.style, containerStyle]}>
