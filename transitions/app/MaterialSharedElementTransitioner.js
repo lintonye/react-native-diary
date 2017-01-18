@@ -51,7 +51,7 @@ class MaterialSharedElementTransitioner extends Component {
         });
     }
     setSharedItemsState(fun: (prevState: State) => SharedItems, callback) {
-        this.setState((prevState, props) => (
+        this.setState((prevState) => (
             { sharedItems: fun(prevState) }
         ), callback);
     }
@@ -107,7 +107,7 @@ class MaterialSharedElementTransitioner extends Component {
         }
         if (toUpdate.length > 0) {
             // console.log('measured, setting meatured state:', toUpdate)
-            this.setState((prevState: State) => ({
+            this.setState((prevState: State): State => ({
                 sharedItems: prevState.sharedItems.updateMetrics(toUpdate),
                 itemsToMeasure: [],
             }));
@@ -278,7 +278,7 @@ class MaterialSharedElementTransitioner extends Component {
         // console.log(this.state.sharedItems._items.map(i => `${i.name} ${i.containerRouteName} ${JSON.stringify(i.metrics)}`))
         if (pairs.length > 0) {
             InteractionManager.runAfterInteractions(() => {
-                this.setState((prevState: State) => ({
+                this.setState((prevState: State): State => ({
                     // remove metrics of sharedViews on the target scene so that it'll be re-measured when moving to the next scene.
                     // This guarantees the location of the cloned view on the overlay is always consistent with the original view.
                     sharedItems: prevState.sharedItems.updateMetrics(pairs.map(p => ({
