@@ -176,7 +176,7 @@ class MaterialSharedElementTransitioner extends Component {
         return {
             width,
             height,
-            elevation: this._interpolateElevation(progress, 1), // make sure shared elements stay above the faked container
+            elevation: this._interpolateElevation(props, prevProps, 1), // make sure shared elements stay above the faked container
             position: 'absolute',
             left,
             top,
@@ -201,10 +201,14 @@ class MaterialSharedElementTransitioner extends Component {
         const height = bottom - top;
         return { left, top, right, bottom, width, height };
     }
-    _interpolateElevation(progress, base: number) {
-        //TOOD perhaps should use position instead of progress
-        return progress.interpolate({
-            inputRange: [0, 1],
+    _interpolateElevation(props, prevProps, base: number) {
+        const { position, navigationState: {index} } = props;
+        const prevIndex = prevProps.navigationState.index;
+        const minIdx = Math.min(index, prevIndex);
+        const maxIdx = Math.max(index, prevIndex);
+
+        return position.interpolate({
+            inputRange: [minIdx, maxIdx],
             outputRange: [5 + base, 25 + base],
         });
     }
@@ -236,7 +240,7 @@ class MaterialSharedElementTransitioner extends Component {
             inputRange,
             outputRange: [index > prevIndex ? fromItemBBox.height : toItemBBox.height, windowHeight],
         });
-        const elevation = this._interpolateElevation(progress, 0);
+        const elevation = this._interpolateElevation(props, prevProps, 0);
         const style = {
             backgroundColor: '#e2e2e2',
             elevation,
