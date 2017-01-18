@@ -1,38 +1,50 @@
 // @flow
 
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
     View,
     UIManager,
     findNodeHandle,
 } from 'react-native';
 
-import NativeMethodsMixin from 'NativeMethodsMixin';
-
-import SharedElementRepo from './SharedElementRepo';
+import { SharedItem } from './SharedItems';
 
 class SharedView extends Component {
+    _view: any;
+    static contextTypes = {
+        registerSharedView: React.PropTypes.func,
+        unregisterSharedView: React.PropTypes.func,
+    };
     render() {
+        // collapsable={false} is required for UIManager.measureInWindow to get the actual measurements
+        // instead of undefined, see https://github.com/facebook/react-native/issues/9382
         return (
-            <View
-                onLayout={this._onLayout.bind(this)}
-                ref={c => this._comp = c}
-                >
+            <View collapsable={false}
+                ref={c => this._view = c}>
                 {this.props.children}
             </View>
         )
     }
-    _onLayout(event) {
-        const { id, isOnDetail } = this.props;
-        return new Promise((resolve, reject) => {
-            UIManager.measureInWindow(
-                findNodeHandle(this._comp),
-                (x, y, width, height) => {
-                    SharedElementRepo.put(id, !!isOnDetail, this.render(), {x, y, width, height});
-                    resolve();
-                }
-            );
-        });
+    componentDidMount() {
+        const { registerSharedView } = this.context;
+        if (!registerSharedView) return;
+
+        const { name, containerRouteName } = this.props;
+        const nativeHandle = findNodeHandle(this._view);
+        registerSharedView(new SharedItem(
+            name,
+            containerRouteName,
+            this.render(),
+            nativeHandle,
+        ));
+    }
+
+    componentWillUnmount() {
+        const { unregisterSharedView } = this.context;
+        if (!unregisterSharedView) return;
+
+        const { name, containerRouteName } = this.props;
+        unregisterSharedView(name, containerRouteName);
     }
 }
 

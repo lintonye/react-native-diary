@@ -26,7 +26,6 @@ const SettingsScreen = ({transition, duration, onTransitionChanged, onDurationCh
                 <Picker.Item label="cardStack" value="cardStack" />
                 <Picker.Item label="crossFade" value="crossFade" />
                 <Picker.Item label="androidDefault" value="androidDefault" />
-                <Picker.Item label="sharedElement" value="sharedElement" />
                 <Picker.Item label="materialSharedElement" value="materialSharedElement" />
             </Picker>
             {
