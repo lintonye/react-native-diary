@@ -189,8 +189,9 @@ class MaterialSharedElementTransitioner extends Component {
         };
     }
     _getBBox(metricsArray: Array<Metrics>) {
-        let left = top = Number.MAX_VALUE;
-        let right = bottom = Number.MIN_VALUE;
+        let left, top, right, bottom;
+        left = top = Number.MAX_VALUE;
+        right = bottom = Number.MIN_VALUE;
         metricsArray.forEach(m => {
             if (m.x < left) left = m.x;
             if (m.y < top) top = m.y;
