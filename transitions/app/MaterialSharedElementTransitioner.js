@@ -75,7 +75,10 @@ class MaterialSharedElementTransitioner extends Component {
                 const matchingItem = self.state.sharedItems.findMatchByName(name, containerRouteName);
                 // schedule to measure (on layout) if another view with the same name is mounted
                 if (matchingItem) {
-                    self.setState({ itemsToMeasure: [sharedItem, matchingItem] });
+                    self.setState((prevState:State) => ({
+                        sharedItems: prevState.sharedItems,
+                        itemsToMeasure: [...prevState.itemsToMeasure, sharedItem, matchingItem] 
+                    }));
                 }
             },
             unregisterSharedView(name: string, containerRouteName: string) {
@@ -275,7 +278,7 @@ class MaterialSharedElementTransitioner extends Component {
             );
         });
         // const pairsStr = pairs.map(p => Object.keys(p).map(k => `${k}: ${JSON.stringify(p[k].metrics)}`))
-        // console.log('from:', fromRoute, 'to:', toRoute, 'pairs:', pairsStr, 'allReady?:', this.state.sharedItems.areMetricsReadyForAllPairs(fromRoute, toRoute), 'items:', this.state.sharedItems._items.filter(i => i.metrics).map(i => `${i.name.slice(i.name.lastIndexOf('?'))} ${i.containerRouteName} ${JSON.stringify(i.metrics)}`));
+        // console.log('from:', fromRoute, 'to:', toRoute, 'pairs:', pairsStr, 'items:', this.state.sharedItems._items.filter(i => i.metrics).map(i => `${i.name} ${i.containerRouteName} ${JSON.stringify(i.metrics)}`));
         // console.log(this.state.sharedItems._items.map(i => `${i.name} ${i.containerRouteName} ${JSON.stringify(i.metrics)}`))
         // if (pairs.length > 0) {
         //     InteractionManager.runAfterInteractions(() => {
