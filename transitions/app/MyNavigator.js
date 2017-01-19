@@ -12,6 +12,7 @@ import type {NavigationRoute } from 'react-native';
 
 import PhotoGridScreen from './PhotoGridScreen';
 import PhotoDetail from './PhotoDetail';
+import PhotoMoreDetail from './PhotoMoreDetail';
 import SettingsScreen from './SettingsScreen';
 import MaterialSharedElementTransitioner from './MaterialSharedElementTransitioner';
 import CrossFadeTransitioner from './CrossFadeTransitioner';
@@ -35,7 +36,7 @@ class MyNavigator extends Component {
         this.state = {
             navigation: {
                 routes: [{ key: 'ROUTE_PHOTO_GRID' }],
-                // routes: [{ key: 'ROUTE_PHOTO_DETAIL', photo:{url:'http://lorempixel.com/500/500/animals?71531'} }],
+                // routes: [{ key: 'ROUTE_PHOTO_MORE_DETAIL', photo:{url:'http://lorempixel.com/500/500/animals?71531', title: 'Title', description: Array(100).fill(0).map(_ => 'blah').join(','), image:require('./images/img1.jpg')} }],
                 index: 0,
             },
             transition: 'materialSharedElement',
@@ -74,7 +75,7 @@ class MyNavigator extends Component {
         this.setState({ navigation: StateUtils.pop(this.state.navigation) })
     }
     navigate(key: string, payload?: Object) {
-        this.setState({ navigation: StateUtils.push(this.state.navigation, { key, ...payload}) })
+        this.setState({ navigation: StateUtils.push(this.state.navigation, { key, ...payload }) })
     }
     renderScene(sceneProps) {
         // console.log('scenes => ', sceneProps.scenes);
@@ -82,31 +83,35 @@ class MyNavigator extends Component {
         const {key} = route;
         switch (key) {
             case 'ROUTE_PHOTO_GRID':
-                return (<PhotoGridScreen 
+                return (<PhotoGridScreen
                     transition={this.state.transition}
                     duration={this.state.duration}
-                    onPhotoPressed={ photo => 
+                    onPhotoPressed={photo =>
                         this.navigate('ROUTE_PHOTO_DETAIL', { photo })
                     }
-                    onOpenSettings={ transition =>
+                    onOpenSettings={transition =>
                         this.navigate('ROUTE_SETTINGS')
                     }
                     />);
             case 'ROUTE_PHOTO_DETAIL':
-                return (<PhotoDetail photo={route.photo} />);
+                return (<PhotoDetail photo={route.photo} onPhotoPressed={photo =>
+                    this.navigate('ROUTE_PHOTO_MORE_DETAIL', { photo })
+                } />);
+            case 'ROUTE_PHOTO_MORE_DETAIL':
+                return (<PhotoMoreDetail photo={route.photo} />);
             case 'ROUTE_SETTINGS':
                 return (
                     <SettingsScreen
                         transition={this.state.transition}
                         duration={this.state.duration}
-                        onTransitionChanged={ transition =>
+                        onTransitionChanged={transition =>
                             this.setState({ transition })
                         }
-                        onDurationChanged={ duration =>
+                        onDurationChanged={duration =>
                             this.setState({ duration })
                         }
                         onBack={this.navigateBack.bind(this)}
-                    />
+                        />
                 );
             default:
                 return <Text>Invalid route {key} </Text>
