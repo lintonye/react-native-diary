@@ -64,7 +64,7 @@ class PhotoGrid extends Component {
         )
     }
     renderCell(photo) {
-        const onPhotoPressed = this.props.onPhotoPressed;
+        const onPhotoPressed = photo => this.props.navigation.navigate('PhotoDetail', { photo });
         return (
             <TouchableNativeFeedback onPress={() => onPhotoPressed(photo)} key={photo.url}>
                 <View style={styles.cell}>
