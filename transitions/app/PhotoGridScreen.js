@@ -1,5 +1,5 @@
 // @flow
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 
 import {
     View,
@@ -13,9 +13,13 @@ import PhotoGrid from './PhotoGrid';
 import Toolbar from './Toolbar';
 
 class PhotoGridScreen extends Component {
+    static contextTypes = {
+        setActiveTransition: React.PropTypes.func,
+        getActiveTransition: React.PropTypes.func,
+    }
     render() {
         const toolbarActions = [
-            { title: 'Settings', show: 'always', iconName: 'settings', iconColor: 'white'},
+            { title: 'Settings', show: 'always', iconName: 'settings', iconColor: 'white' },
             // { title: 'Change duration', show: 'always', iconName: 'access-time', iconColor: 'white'},
         ];
         const onActionSelected = index => {
@@ -26,10 +30,10 @@ class PhotoGridScreen extends Component {
         }
         return (
             <View>
-                <Toolbar title={`${this.props.transition}`}
+                <Toolbar title={`${this.context.getActiveTransition()}`}
                     actions={toolbarActions}
                     onActionSelected={onActionSelected}
-                 />
+                    />
                 <PhotoGrid {...this.props} />
             </View>
         )
