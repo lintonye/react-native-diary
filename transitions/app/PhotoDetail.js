@@ -17,18 +17,20 @@ import SharedView from './SharedView';
 const { width: windowWidth } = Dimensions.get("window");
 
 const PhotoDetail = (props) => {
-    const { url, title, description, image } = props.photo;
+    const { photo } = props.navigation.state.params;
+    const { url, title, description, image } = photo;
+    const openMoreDetails = photo => props.navigation.navigate('PhotoMoreDetail', { photo });
     return (
         <ScrollView>
             <View>
-                <TouchableNativeFeedback onPress={() => props.onPhotoPressed(props.photo)}>
+                <TouchableNativeFeedback onPress={() => openMoreDetails(photo) }>
                     <View>
-                        <SharedView name={`image-${url}`} containerRouteName='ROUTE_PHOTO_DETAIL'>
+                        <SharedView name={`image-${url}`} containerRouteName='PhotoDetail'>
                             <Image source={image} style={styles.image} />
                         </SharedView>
                     </View>
                 </TouchableNativeFeedback>
-                <SharedView name={`title-${url}`} containerRouteName='ROUTE_PHOTO_DETAIL'>
+                <SharedView name={`title-${url}`} containerRouteName='PhotoDetail'>
                     <Text style={[styles.text, styles.title]}>{title}</Text>
                 </SharedView>
                 <Text style={[styles.text]}>{description}</Text>

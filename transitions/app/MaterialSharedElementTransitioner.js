@@ -2,7 +2,6 @@
 import React, { Component } from 'react';
 import {
     View,
-    NavigationExperimental,
     StyleSheet,
     Animated,
     Text,
@@ -11,15 +10,13 @@ import {
     InteractionManager,
 } from 'react-native';
 
+import { Transitioner, addNavigationHelpers } from 'react-navigation';
+
 import type {NavigationTransitionProps } from 'NavigationTypeDefinition';
 
 import SharedItems from './SharedItems';
 
 import type { Metrics, SharedItem, UpdateRequest } from './SharedItems';
-
-const {
-    Transitioner,
-} = NavigationExperimental;
 
 type State = {
     sharedItems: SharedItems,
@@ -75,9 +72,9 @@ class MaterialSharedElementTransitioner extends Component {
                 const matchingItem = self.state.sharedItems.findMatchByName(name, containerRouteName);
                 // schedule to measure (on layout) if another view with the same name is mounted
                 if (matchingItem) {
-                    self.setState((prevState:State) => ({
+                    self.setState((prevState: State) => ({
                         sharedItems: prevState.sharedItems,
-                        itemsToMeasure: [...prevState.itemsToMeasure, sharedItem, matchingItem] 
+                        itemsToMeasure: [...prevState.itemsToMeasure, sharedItem, matchingItem]
                     }));
                 }
             },
@@ -118,7 +115,7 @@ class MaterialSharedElementTransitioner extends Component {
                 <Transitioner
                     configureTransition={this._configureTransition.bind(this)}
                     render={this._render.bind(this)}
-                    navigationState={this.props.navigationState}
+                    navigationState={this.props.navigation.state}
                     style={this.props.style}
                     />
             </View>
@@ -259,9 +256,8 @@ class MaterialSharedElementTransitioner extends Component {
         return <Animated.View style={style} />;
     }
     _renderOverlay(props: NavigationTransitionProps, prevProps: NavigationTransitionProps) {
-        // TODO change to routeName after switching to react-navigation
-        const fromRoute = prevProps ? prevProps.scene.route.key : 'unknownRoute';
-        const toRoute = props.scene.route.key;
+        const fromRoute = prevProps ? prevProps.scene.route.routeName : 'unknownRoute';
+        const toRoute = props.scene.route.routeName;
         const pairs = this.state.sharedItems.getMeasuredItemPairs(fromRoute, toRoute);
         const sharedElements = pairs.map((pair, idx) => {
             const {fromItem, toItem} = pair;
@@ -314,8 +310,8 @@ class MaterialSharedElementTransitioner extends Component {
         };
         return <Animated.View style={[styles.overlay, animatedStyle]} />;
     }
-    _renderScene(props) {
-        const { position, scene, progress } = props;
+    _renderScene(transitionProps) {
+        const { position, scene, progress } = transitionProps;
         const { index } = scene;
         const inputRange = [index - 1, index - 0.01, index, index + 0.99, index + 1];
         const opacity = position.interpolate({
@@ -323,14 +319,29 @@ class MaterialSharedElementTransitioner extends Component {
             outputRange: [0, 0, 1, 1, 0],
         });
         const style = { opacity };
+        const Scene = this.props.router.getComponentForRouteName(scene.route.routeName);
+        const navigation = this._getChildNavigation(scene);
 
         return (
-            <Animated.View key={props.scene.route.key} style={[style, styles.scene]}>
-                {this.props.renderScene(props)}
+            <Animated.View key={transitionProps.scene.route.key} style={[style, styles.scene]}>
+                <Scene navigation={navigation} />
                 {this._renderDarkeningOverlay(progress, position, index)}
             </Animated.View>
-        )
+        );
     }
+
+    _getChildNavigation = (scene: NavigationScene): NavigationScreenProp<NavigationRoute, NavigationAction> => {
+        if (!this._childNavigationProps) this._childNavigationProps = {};
+        let navigation = this._childNavigationProps[scene.key];
+        if (!navigation || navigation.state !== scene.route) {
+            navigation = this._childNavigationProps[scene.key] = addNavigationHelpers({
+                ...this.props.navigation,
+                state: scene.route,
+            });
+        }
+        return navigation;
+    }
+
 }
 
 const styles = StyleSheet.create({
