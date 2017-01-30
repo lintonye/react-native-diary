@@ -4,7 +4,6 @@ import React, { Component } from 'react';
 import {
     View,
     Text,
-    NavigationExperimental,
     BackAndroid,
 } from 'react-native';
 
