@@ -25,12 +25,12 @@ const PhotoDetail = (props) => {
             <View>
                 <TouchableNativeFeedback onPress={() => openMoreDetails(photo) }>
                     <View>
-                        <SharedView name={`image-${url}`} containerRouteName='ROUTE_PHOTO_DETAIL'>
+                        <SharedView name={`image-${url}`} containerRouteName='PhotoDetail'>
                             <Image source={image} style={styles.image} />
                         </SharedView>
                     </View>
                 </TouchableNativeFeedback>
-                <SharedView name={`title-${url}`} containerRouteName='ROUTE_PHOTO_DETAIL'>
+                <SharedView name={`title-${url}`} containerRouteName='PhotoDetail'>
                     <Text style={[styles.text, styles.title]}>{title}</Text>
                 </SharedView>
                 <Text style={[styles.text]}>{description}</Text>

@@ -20,7 +20,7 @@ class PhotoGridScreen extends Component {
         ];
         const onActionSelected = index => {
             switch (index) {
-                case 0: this.props.onOpenSettings(); break;
+                case 0: this.props.navigation.navigate('Settings'); break;
                 default: alert(`Invalid action index: ${index}`);
             }
         }
