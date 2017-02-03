@@ -11,18 +11,20 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 const {ToolbarAndroid} = Icon;
 
-const ToolbarIos = (props) => (
-    <View {...props} style={{backgroundColor:'blue', paddingTop: 20}}>
-        {
-            (props.navigation.state
-                ? (
-                    <Button color="white" title="Back" onPress={() => props.navigation.goBack()}
+const ToolbarIos = (props) => {
+    return (
+        <View {...props} style={{ backgroundColor: 'blue', paddingTop: 20 }}>
+            {
+                (props.navigation.state.routeName !== 'PhotoGrid'
+                    ? (
+                        <Button color="white" title="Back" onPress={() => props.navigation.goBack()}
                         />
-                )
-                : null)
-        }
-    </View>
-)
+                    )
+                    : null)
+            }
+        </View>
+    )
+}
 
 const Toolbar = (props) => {
     const Comp = (Platform.OS === 'android'
