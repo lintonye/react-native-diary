@@ -9,10 +9,10 @@ import {
     Dimensions,
     Text,
     Easing,
-    TouchableNativeFeedback,
 } from 'react-native';
 
 import SharedView from './SharedView';
+import Touchable from './Touchable';
 
 const { width: windowWidth } = Dimensions.get("window");
 
@@ -21,13 +21,13 @@ const PhotoDetail = (props) => {
     return (
         <ScrollView>
             <View>
-                <TouchableNativeFeedback onPress={() => props.onPhotoPressed(props.photo)}>
+                <Touchable onPress={() => props.onPhotoPressed(props.photo)}>
                     <View>
                         <SharedView name={`image-${url}`} containerRouteName='ROUTE_PHOTO_DETAIL'>
                             <Image source={image} style={styles.image} />
                         </SharedView>
                     </View>
-                </TouchableNativeFeedback>
+                </Touchable>
                 <SharedView name={`title-${url}`} containerRouteName='ROUTE_PHOTO_DETAIL'>
                     <Text style={[styles.text, styles.title]}>{title}</Text>
                 </SharedView>

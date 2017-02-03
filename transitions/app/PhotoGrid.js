@@ -5,7 +5,6 @@ import {
     Image,
     View,
     Text,
-    TouchableNativeFeedback,
     Dimensions,
     StyleSheet,
 } from 'react-native';
@@ -13,6 +12,7 @@ import faker from 'faker';
 import _ from 'lodash';
 
 import SharedView from './SharedView';
+import Touchable from './Touchable';
 
 const ds = new ListView.DataSource({
     rowHasChanged: (r1, r2) => r1 !== r2,
@@ -66,13 +66,13 @@ class PhotoGrid extends Component {
     renderCell(photo) {
         const onPhotoPressed = this.props.onPhotoPressed;
         return (
-            <TouchableNativeFeedback onPress={() => onPhotoPressed(photo)} key={photo.url}>
+            <Touchable onPress={() => onPhotoPressed(photo)} key={photo.url}>
                 <View style={styles.cell}>
                     <SharedView name={`image-${photo.url}`} containerRouteName='ROUTE_PHOTO_GRID'>
                         <Image source={photo.image} style={styles.image}/>
                     </SharedView>
                 </View>
-            </TouchableNativeFeedback>
+            </Touchable>
         )
     }
 }
