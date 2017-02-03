@@ -16,21 +16,24 @@ import SharedView from './SharedView';
 
 const { width: windowWidth } = Dimensions.get("window");
 
-const PhotoMoreDetail = ({ photo: {url, title, description, image} }) => (
-    <ScrollView>
-        <View>
-            <View style={styles.container}>
-                <SharedView name={`title-${url}`} containerRouteName='ROUTE_PHOTO_MORE_DETAIL'>
-                    <Text style={[styles.text, styles.title]}>{title}</Text>
-                </SharedView>
-                <SharedView name={`image-${url}`} containerRouteName='ROUTE_PHOTO_MORE_DETAIL'>
-                    <Image source={image} style={styles.image} />
-                </SharedView>
+const PhotoMoreDetail = (props) => {
+    const { photo: {url, title, description, image} } = props.navigation.state.params;
+    return (
+        <ScrollView>
+            <View>
+                <View style={styles.container}>
+                    <SharedView name={`title-${url}`} containerRouteName='PhotoMoreDetail'>
+                        <Text style={[styles.text, styles.title]}>{title}</Text>
+                    </SharedView>
+                    <SharedView name={`image-${url}`} containerRouteName='PhotoMoreDetail'>
+                        <Image source={image} style={styles.image} />
+                    </SharedView>
+                </View>
+                <Text style={[styles.text]}>{description}</Text>
             </View>
-            <Text style={[styles.text]}>{description}</Text>
-        </View>
-    </ScrollView>
-);
+        </ScrollView>
+    )
+};
 
 const styles = StyleSheet.create({
     image: {

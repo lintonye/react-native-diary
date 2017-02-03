@@ -64,11 +64,11 @@ class PhotoGrid extends Component {
         )
     }
     renderCell(photo) {
-        const onPhotoPressed = this.props.onPhotoPressed;
+        const onPhotoPressed = photo => this.props.navigation.navigate('PhotoDetail', { photo });
         return (
             <Touchable onPress={() => onPhotoPressed(photo)} key={photo.url}>
                 <View style={styles.cell}>
-                    <SharedView name={`image-${photo.url}`} containerRouteName='ROUTE_PHOTO_GRID'>
+                    <SharedView name={`image-${photo.url}`} containerRouteName='PhotoGrid'>
                         <Image source={photo.image} style={styles.image}/>
                     </SharedView>
                 </View>
