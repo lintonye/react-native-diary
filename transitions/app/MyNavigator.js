@@ -16,10 +16,11 @@ import SettingsScreen from './SettingsScreen';
 import MaterialSharedElementTransitioner from './MaterialSharedElementTransitioner';
 import CrossFadeTransitioner from './CrossFadeTransitioner';
 import AndroidDefaultTransitioner from './AndroidDefaultTransitioner';
+import MultiTransitioner from './MultiTransitioner';
 
 import { createNavigationContainer, createNavigator, StackRouter, CardStack } from 'react-navigation';
 
-type TransitionName = 'cardStack' | 'materialSharedElement' | 'crossFade' | 'androidDefault';
+type TransitionName = 'cardStack' | 'materialSharedElement' | 'crossFade' | 'androidDefault' | 'multiTransitioner';
 
 class TransitionerSwitcher extends Component {
     state: {
@@ -29,7 +30,7 @@ class TransitionerSwitcher extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            transition: 'materialSharedElement',
+            transition: 'multiTransitioner',
             duration: 300,
         };
     }
@@ -39,6 +40,7 @@ class TransitionerSwitcher extends Component {
             materialSharedElement: MaterialSharedElementTransitioner,
             crossFade: CrossFadeTransitioner,
             androidDefault: AndroidDefaultTransitioner,
+            multiTransitioner: MultiTransitioner
         }
         const Transitioner = transitionMap[this.state.transition];
         return (
