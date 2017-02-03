@@ -214,7 +214,7 @@ class MaterialSharedElementTransitioner extends Component {
         });
     }
     _renderFakedSEContainer(pairs, props, prevProps) {
-        if (!prevProps) return null;
+        if (!prevProps || pairs.length === 0) return null;
 
         const fromItemBBox = this._getBBox(pairs.map(p => p.fromItem.metrics));
         const toItemBBox = this._getBBox(pairs.map(p => p.toItem.metrics));
