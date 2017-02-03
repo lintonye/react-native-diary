@@ -13,25 +13,29 @@ import {
 } from 'react-native';
 
 import SharedView from './SharedView';
+import Toolbar from './Toolbar';
 
 const { width: windowWidth } = Dimensions.get("window");
 
 const PhotoMoreDetail = (props) => {
     const { photo: {url, title, description, image} } = props.navigation.state.params;
     return (
-        <ScrollView>
-            <View>
-                <View style={styles.container}>
-                    <SharedView name={`title-${url}`} containerRouteName='PhotoMoreDetail'>
-                        <Text style={[styles.text, styles.title]}>{title}</Text>
-                    </SharedView>
-                    <SharedView name={`image-${url}`} containerRouteName='PhotoMoreDetail'>
-                        <Image source={image} style={styles.image} />
-                    </SharedView>
+        <View>
+            <Toolbar navigation={props.navigation} />
+            <ScrollView>
+                <View>
+                    <View style={styles.container}>
+                        <SharedView name={`title-${url}`} containerRouteName='PhotoMoreDetail'>
+                            <Text style={[styles.text, styles.title]}>{title}</Text>
+                        </SharedView>
+                        <SharedView name={`image-${url}`} containerRouteName='PhotoMoreDetail'>
+                            <Image source={image} style={styles.image} />
+                        </SharedView>
+                    </View>
+                    <Text style={[styles.text]}>{description}</Text>
                 </View>
-                <Text style={[styles.text]}>{description}</Text>
-            </View>
-        </ScrollView>
+            </ScrollView>
+        </View>
     )
 };
 
