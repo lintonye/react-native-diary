@@ -31,6 +31,7 @@ class PhotoGridScreen extends Component {
         return (
             <View>
                 <Toolbar title={`${this.context.getActiveTransition()}`}
+                    navigation={this.props.navigation}
                     actions={toolbarActions}
                     onActionSelected={onActionSelected}
                     />

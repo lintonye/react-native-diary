@@ -111,14 +111,12 @@ class MaterialSharedElementTransitioner extends Component {
     }
     render() {
         return (
-            <View style={{ flex: 1 }} onLayout={this._onLayout.bind(this)}>
-                <Transitioner
-                    configureTransition={this._configureTransition.bind(this)}
-                    render={this._render.bind(this)}
-                    navigationState={this.props.navigation.state}
-                    style={this.props.style}
-                    />
-            </View>
+            <Transitioner
+                configureTransition={this._configureTransition.bind(this)}
+                render={this._render.bind(this)}
+                navigationState={this.props.navigation.state}
+                style={this.props.style}
+            />
         );
     }
     _configureTransition() {
@@ -214,7 +212,7 @@ class MaterialSharedElementTransitioner extends Component {
         });
     }
     _renderFakedSEContainer(pairs, props, prevProps) {
-        if (!prevProps) return null;
+        if (!prevProps || pairs.length === 0) return null;
 
         const fromItemBBox = this._getBBox(pairs.map(p => p.fromItem.metrics));
         const toItemBBox = this._getBBox(pairs.map(p => p.toItem.metrics));
@@ -293,8 +291,8 @@ class MaterialSharedElementTransitioner extends Component {
         const containerStyle = this._getOverlayContainerStyle(props.progress);
         return (
             <Animated.View style={[styles.overlay, this.props.style, containerStyle]}>
-                {sharedElements}
                 {this._renderFakedSEContainer(pairs, props, prevProps)}
+                {sharedElements}
             </Animated.View>
         );
     }
@@ -323,7 +321,9 @@ class MaterialSharedElementTransitioner extends Component {
         const navigation = this._getChildNavigation(scene);
 
         return (
-            <Animated.View key={transitionProps.scene.route.key} style={[style, styles.scene]}>
+            <Animated.View key={transitionProps.scene.route.key} style={[style, styles.scene]}
+                onLayout={this._onLayout.bind(this)}
+            >
                 <Scene navigation={navigation} />
                 {this._renderDarkeningOverlay(progress, position, index)}
             </Animated.View>
