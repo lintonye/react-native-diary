@@ -18,7 +18,7 @@ const Fruit = ({name}) => (
 
 class FruitInComp extends Component {
   render() {
-    return <Fruit {...this.props} />;
+    return <Fruit name={this.props.name} />;
   }
 }
 
@@ -42,7 +42,7 @@ const monkeyPatch = (e: React.Element<*>) => {
     // const NewType = (props) => monkeyPatch(<OldType {...props}>{props.children}</OldType>);
 
     const NewType = function () { };
-    NewType.prototype = e.type.prototype; //new e.type(e.props);
+    NewType.prototype = new e.type();
     for (let key of Object.keys(e.type)) {
       // Clone things like childContextTypes, displayName etc.
       if (key !== 'prototype') NewType[key] = e.type[key];
