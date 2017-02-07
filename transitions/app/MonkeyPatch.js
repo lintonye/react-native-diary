@@ -46,7 +46,7 @@ const isClassComponent = T => typeof T === 'function' && typeof T.prototype.rend
 const isComponent = T => isFunctionalComponent(T) || isClassComponent(T);
 const clonePrototype = (prototype) => {
   const result = _.clone(prototype);
-  Object.setPrototypeOf(result, prototype);
+  Object.setPrototypeOf(result, prototype); //this does not work on Android
   return result;
 }
 
