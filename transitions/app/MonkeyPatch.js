@@ -4,6 +4,7 @@ import {
   View,
   Text,
 } from 'react-native';
+import _ from 'lodash';
 
 const Wrapper = ({children}) => (
   <View style={{ flexDirection: 'row' }}>
@@ -16,7 +17,7 @@ const Fruit = ({name}) => (
   <Text>{name}</Text>
 );
 
-class FruitInComp extends Component {
+class FruitInClassComp extends Component {
   render() {
     return <Fruit name={this.props.name} />;
   }
@@ -27,29 +28,47 @@ const PropSpecifiedInComp = (props) => (
 );
 
 const PropSpecifiedInInnerComp = (props) => (
-  <PropSpecifiedInComp {...props} />
+  <PropSpecifiedInComp name={props.name} />
 );
 
+class PropSpecifiedInClassComp extends Component {
+  render() {
+    return <Text needsMonkey={true}>{this.props.name}</Text>;
+  }
+}
+
+const PropSpecifiedInInnerClassComp = props => <PropSpecifiedInClassComp {...props} />
+
 // TODO comps declared in React.createClass
+const isFunctionalComponent = T => typeof T === 'function' && !T.prototype.render;
+// && ['Fruit', 'PropSpecifiedInComp', 'PropSpecifiedInInnerComp'].includes(T.name);
+const isClassComponent = T => typeof T === 'function' && typeof T.prototype.render === 'function';
+const isComponent = T => isFunctionalComponent(T) || isClassComponent(T);
+const clonePrototype = (prototype) => {
+  const result = _.clone(prototype);
+  Object.setPrototypeOf(result, prototype);
+  return result;
+}
 
 const monkeyPatch = (e: React.Element<*>) => {
   let children: Array<*> = e.props && React.Children.map(e.props.children, monkeyPatch);
   let newE = e;
-  if (e.type && (
-    typeof e.type.prototype.render === 'function')) {
-
-    // const OldType = e.type;
-    // const NewType = (props) => monkeyPatch(<OldType {...props}>{props.children}</OldType>);
-
-    const NewType = function () { };
-    NewType.prototype = new e.type();
-    for (let key of Object.keys(e.type)) {
-      // Clone things like childContextTypes, displayName etc.
-      if (key !== 'prototype') NewType[key] = e.type[key];
+  let NewType = null;
+  if (isComponent(e.type)) {
+    console.log('===> has render', e.type.displayName || e.type.name, typeof e.type.prototype.render)
+    if (isClassComponent(e.type)) {
+      NewType = function () { };
+      for (let key of Object.keys(e.type)) {
+        // Clone things like childContextTypes, displayName etc.
+        if (key !== 'prototype') NewType[key] = e.type[key];
+      }
+      const oldRender = e.type.prototype.render;
+      const newPrototype = clonePrototype(e.type.prototype);
+      // newPrototype.render = function () { return monkeyPatch(oldRender.call(this)) };
+      NewType.prototype = newPrototype;
+    } else {
+      NewType = (props, context) => monkeyPatch(e.type(props, context));
     }
-    const oldRender = NewType.prototype.render;
-    NewType.prototype.render = function () { return monkeyPatch(oldRender.call(this)) };
-
 
     NewType.displayName = 'Patched.' + (e.type.displayName || e.type.name);
     newE = React.createElement(NewType, e.props, children);
@@ -76,12 +95,15 @@ const printElement = (e: React.Element<*>, level: number = 0) => {
 class WrappedApp extends Component {
   render() {
     const e = (
-      // <Text needsMonkey={true}>Bananas (inline Text)</Text>
       <View>
-        <Fruit name="Apples" needsMonkey={true} />
-        <FruitInComp name="Oranges" needsMonkey={true} />
-        <PropSpecifiedInComp name="Kiwis" />
-        <PropSpecifiedInInnerComp name="Pears" />
+        <Text needsMonkey={true}>Bananas (inline Text)</Text>
+        <Fruit name="Apples (Fruit)" needsMonkey={true} />
+        <FruitInClassComp name="Oranges (FruitInClassComp)" needsMonkey={true} />
+        <Text> --- Prop specified in comps --- </Text>
+        <PropSpecifiedInComp name="Kiwis (In functional Comp)" />
+        <PropSpecifiedInInnerComp name="Pears (In inner functional Comp)" />
+        <PropSpecifiedInClassComp name="Kiwis (In class Comp)" />
+        <PropSpecifiedInInnerClassComp name="Pears (In inner class Comp)" />
         <Fruit name="Rocks" needsMonkey={false} />
       </View>
     );
