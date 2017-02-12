@@ -46,7 +46,7 @@ const PhotoDetail = (props) => {
 const styles = StyleSheet.create({
     image: {
         width: windowWidth,
-        height: windowWidth,
+        height: windowWidth / 2,
     },
     title: {
         fontSize: 25,

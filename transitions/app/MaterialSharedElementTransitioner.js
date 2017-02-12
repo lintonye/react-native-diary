@@ -146,44 +146,86 @@ class MaterialSharedElementTransitioner extends Component {
     }
     _getSharedElementStyle(props, prevProps, itemFrom, itemTo) {
         const { position, progress, navigationState: {index} } = props;
-        const prevIndex = prevProps.navigationState.index;
-        const toVsFromScaleX = itemTo.scaleRelativeTo(itemFrom).x;
-        const toVsFromScaleY = itemTo.scaleRelativeTo(itemFrom).y;
-        const minIdx = Math.min(index, prevIndex);
-        const maxIdx = Math.max(index, prevIndex);
-        const inputRange = [minIdx, maxIdx];
-        const adaptRange = (range) => index > prevIndex ? range : range.reverse();
-        const scaleX = position.interpolate({
-            inputRange,
-            outputRange: adaptRange([1, toVsFromScaleX]),
+
+        const getElementType = (item) => {
+            const type = item.reactElement.type;
+            return type && (type.displayName || type.name);
+        }
+        const animateWidthHeight = (itemFrom, itemTo) => {
+            const width = progress.interpolate({
+                inputRange: [0, 1],
+                outputRange: [itemFrom.metrics.width, itemTo.metrics.width],
+            });
+            const height = progress.interpolate({
+                inputRange: [0, 1],
+                outputRange: [itemFrom.metrics.height, itemTo.metrics.height],
+            });
+            return { width, height };
+        };
+
+        const animateScale = (itemFrom, itemTo) => {
+            const toVsFromScaleX = itemTo.scaleRelativeTo(itemFrom).x;
+            const toVsFromScaleY = itemTo.scaleRelativeTo(itemFrom).y;
+            // using progress is actually much simpler than position in previous implementation.
+            const scaleX = progress.interpolate({
+                inputRange: [0, 1],
+                outputRange: [1, toVsFromScaleX]
+            });
+            const scaleY = progress.interpolate({
+                inputRange: [0, 1],
+                outputRange: [1, toVsFromScaleY]
+            });
+            const left = progress.interpolate({
+                inputRange: [0, 1],
+                outputRange: [itemFrom.metrics.x, itemTo.metrics.x + itemFrom.metrics.width / 2 * (toVsFromScaleX - 1)],
+            });
+            const top = progress.interpolate({
+                inputRange: [0, 1],
+                outputRange: [itemFrom.metrics.y, itemTo.metrics.y + itemFrom.metrics.height / 2 * (toVsFromScaleY - 1)],
+            });
+            return {
+                left,
+                top,
+                transform: [
+                    { scaleX }, { scaleY }
+                ]
+            };
+        }
+
+        const animateFontSize = (itemFrom, itemTo) => {
+            return {};
+        }
+
+        const elementType = getElementType(itemFrom);
+        let style;
+        switch (elementType) {
+            case 'Image': style = animateWidthHeight(itemFrom, itemTo); break;
+            case 'Text': style = {
+                ...animateWidthHeight(itemFrom, itemTo),
+                ...animateFontSize(itemFrom, itemTo),
+            };
+                break;
+            default:
+                style = animateScale(itemFrom, itemTo);
+        }
+
+        const left = progress.interpolate({
+            inputRange: [0, 1],
+            outputRange: [itemFrom.metrics.x, itemTo.metrics.x],
         });
-        const scaleY = position.interpolate({
-            inputRange,
-            outputRange: adaptRange([1, toVsFromScaleY]),
+        const top = progress.interpolate({
+            inputRange: [0, 1],
+            outputRange: [itemFrom.metrics.y, itemTo.metrics.y],
         });
-        const width = itemFrom.metrics.width;
-        const height = itemFrom.metrics.height;
-        const left = position.interpolate({
-            inputRange,
-            outputRange: adaptRange([itemFrom.metrics.x, itemTo.metrics.x + width / 2 * (toVsFromScaleX - 1)]),
-        });
-        const top = position.interpolate({
-            inputRange,
-            outputRange: adaptRange([itemFrom.metrics.y, itemTo.metrics.y + height / 2 * (toVsFromScaleY - 1)]),
-        });
+
         return {
-            width,
-            height,
             elevation: this._interpolateElevation(props, prevProps, 1), // make sure shared elements stay above the faked container
             position: 'absolute',
             left,
             top,
             right: null,
             bottom: null,
-            transform: [
-                { scaleX },
-                { scaleY },
-            ],
+            ...style,
         };
     }
     _getBBox(metricsArray: Array<Metrics>) {
@@ -261,15 +303,10 @@ class MaterialSharedElementTransitioner extends Component {
             const {fromItem, toItem} = pair;
             const animatedStyle = this._getSharedElementStyle(props, prevProps, fromItem, toItem);
             const element = fromItem.reactElement;
-            const cloned = React.cloneElement(element, {
-                onLayout: null,
-                ref: null,
-            });
-            return (
-                <Animated.View style={[animatedStyle]} key={idx}>
-                    {cloned}
-                </Animated.View>
-            );
+            const AnimatedComp = Animated.createAnimatedComponent(element.type);
+            return React.createElement(AnimatedComp,
+                { ...element.props, style: [element.props.style, animatedStyle], key: idx },
+                element.props.children);
         });
         // const pairsStr = pairs.map(p => Object.keys(p).map(k => `${k}: ${JSON.stringify(p[k].metrics)}`))
         // console.log('from:', fromRoute, 'to:', toRoute, 'pairs:', pairsStr, 'items:', this.state.sharedItems._items.filter(i => i.metrics).map(i => `${i.name} ${i.containerRouteName} ${JSON.stringify(i.metrics)}`));
