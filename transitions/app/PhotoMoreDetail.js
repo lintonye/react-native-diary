@@ -26,7 +26,7 @@ const PhotoMoreDetail = (props) => {
                 <View>
                     <View style={styles.container}>
                         <SharedView name={`title-${url}`} containerRouteName='PhotoMoreDetail'>
-                            <Text style={[styles.text, styles.title]}>{title}</Text>
+                            <Text style={[styles.text, styles.title]} fontSize={25}>{title}</Text>
                         </SharedView>
                         <SharedView name={`image-${url}`} containerRouteName='PhotoMoreDetail'>
                             <Image source={image} style={styles.image} />

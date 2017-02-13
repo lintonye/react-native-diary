@@ -190,11 +190,18 @@ class MaterialSharedElementTransitioner extends Component {
                     { scaleX }, { scaleY }
                 ]
             };
-        }
+        };
 
         const animateFontSize = (itemFrom, itemTo) => {
-            return {};
-        }
+            // This requires the shared Text to have a "fontSize" prop that is the same as the style.
+            const getFontSize = element => (element.props && element.props.fontSize) || 12;
+            return {
+                fontSize: progress.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [getFontSize(itemFrom.reactElement), getFontSize(itemTo.reactElement)],
+                })
+            };
+        };
 
         const elementType = getElementType(itemFrom);
         let style;
@@ -207,7 +214,7 @@ class MaterialSharedElementTransitioner extends Component {
                 break;
             default:
                 style = animateScale(itemFrom, itemTo);
-        }
+        };
 
         const left = progress.interpolate({
             inputRange: [0, 1],
