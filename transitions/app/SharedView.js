@@ -34,7 +34,7 @@ class SharedView extends Component {
         registerSharedView(new SharedItem(
             name,
             containerRouteName,
-            this.render(),
+            React.Children.only(this.props.children),
             nativeHandle,
         ));
     }

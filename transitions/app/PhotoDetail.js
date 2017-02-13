@@ -34,7 +34,7 @@ const PhotoDetail = (props) => {
                         </View>
                     </Touchable>
                     <SharedView name={`title-${url}`} containerRouteName='PhotoDetail'>
-                        <Text style={[styles.text, styles.title]}>{title}</Text>
+                        <Text style={[styles.text, styles.title]} fontSize={35}>{title}</Text>
                     </SharedView>
                     <Text style={[styles.text]}>{description}</Text>
                 </View>
@@ -46,10 +46,10 @@ const PhotoDetail = (props) => {
 const styles = StyleSheet.create({
     image: {
         width: windowWidth,
-        height: windowWidth,
+        height: windowWidth / 2,
     },
     title: {
-        fontSize: 25,
+        fontSize: 35,
         fontWeight: 'bold',
     },
     text: {
