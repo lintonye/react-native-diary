@@ -12,7 +12,7 @@
     "react": "15.4.1",
     "react-native": "^0.39.2",
     "react-native-vector-icons": "^3.0.0",
-    "react-navigation": "^1.0.0-beta.1"
+    "react-navigation": "git+https://github.com/react-community/react-navigation.git"
   },
   "devDependencies": {
     "babel-jest": "17.0.2",
