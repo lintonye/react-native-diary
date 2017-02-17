@@ -114,7 +114,7 @@ class MaterialSharedElementTransitioner extends Component {
             <Transitioner
                 configureTransition={this._configureTransition.bind(this)}
                 render={this._render.bind(this)}
-                navigationState={this.props.navigation.state}
+                navigation={this.props.navigation}
                 style={this.props.style}
             />
         );
