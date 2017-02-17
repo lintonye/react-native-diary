@@ -11,7 +11,7 @@ import type { NavigationSceneRendererProps } from 'react-navigation';
 
 class AndroidDefaultTransitioner extends Component {
     render() {
-        const transitionConfig = {
+        const transitionConfig = () => ({
             screenInterpolator: (sceneProps: NavigationSceneRendererProps) => {
                 const { position, scene, progress } = sceneProps;
                 const { index } = scene;
@@ -27,7 +27,7 @@ class AndroidDefaultTransitioner extends Component {
 
                 return { opacity, transform: [{ translateY }] };
             }
-        }
+        });
         return (
             <CardStack mode="card"
                 navigation={this.props.navigation}

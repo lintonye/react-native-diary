@@ -11,7 +11,7 @@ import type { NavigationSceneRendererProps } from 'react-navigation';
 
 class CrossFadeTransitioner extends Component {
     render() {
-        const transitionConfig = {
+        const transitionConfig = () => ({
             screenInterpolator: (sceneProps: NavigationSceneRendererProps) => {
                 const { position, scene, progress } = sceneProps;
                 const { index } = scene;
@@ -23,7 +23,7 @@ class CrossFadeTransitioner extends Component {
 
                 return { opacity };
             }
-        }
+        });
         return (
             <CardStack mode="card"
                 navigation={this.props.navigation}
