@@ -98,10 +98,10 @@ android {
     }
     signingConfigs {
         release {
-            storeFile file(JIMU_RELEASE_STORE_FILE)
-            storePassword JIMU_RELEASE_STORE_PASSWORD
-            keyAlias JIMU_RELEASE_KEY_ALIAS
-            keyPassword JIMU_RELEASE_KEY_PASSWORD
+            // storeFile file(JIMU_RELEASE_STORE_FILE)
+            // storePassword JIMU_RELEASE_STORE_PASSWORD
+            // keyAlias JIMU_RELEASE_KEY_ALIAS
+            // keyPassword JIMU_RELEASE_KEY_PASSWORD
         }
     }
     splits {
